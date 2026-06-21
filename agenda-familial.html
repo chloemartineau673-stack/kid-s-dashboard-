@@ -6,7 +6,7 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="theme-color" content="#0F6E56">
+<meta name="theme-color" content="#7B7AC9">
 <title>Agenda familial</title>
 <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore-compat.js"></script>
@@ -20,9 +20,9 @@
     --text:#21201B;
     --text-secondary:#65635A;
     --text-tertiary:#928F82;
-    --accent:#0F6E56;
-    --accent-light:#E1F5EE;
-    --accent-text:#085041;
+    --accent:#7B7AC9;
+    --accent-light:#EDECFB;
+    --accent-text:#3C3489;
     --danger:#A32D2D;
     --danger-bg:#FCEBEB;
     --danger-border:#F09595;
@@ -30,6 +30,7 @@
     --radius-md:10px;
     --radius-lg:16px;
     --shadow-modal:0 12px 32px rgba(30,28,20,0.18);
+    --shadow-postit:0 2px 6px rgba(40,35,20,0.10);
   }
   *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
   html,body{margin:0;padding:0;}
@@ -54,7 +55,6 @@
   }
   .topbar-title{display:flex; align-items:center; gap:10px;}
   .topbar-title h1{font-size:17px; font-weight:600; margin:0;}
-  .topbar-title .sub{font-size:11.5px; opacity:0.85; margin:1px 0 0;}
   .logo-dot{
     width:30px;height:30px;border-radius:9px;
     background:rgba(255,255,255,0.18);
@@ -69,42 +69,34 @@
   }
   .icon-btn:hover{ background:rgba(255,255,255,0.26); }
 
+  /* ---------- Sync indicator ---------- */
+  .sync-badge{
+    display:flex; align-items:center; gap:5px; font-size:10.5px; color:rgba(255,255,255,0.85);
+    margin-top:2px;
+  }
+  .sync-dot{ width:6px;height:6px;border-radius:50%; background:#7BE0B0; flex-shrink:0; }
+  .sync-dot.offline{ background:#F0B05A; }
+
   /* ---------- View toggle ---------- */
-  .viewbar{
-    display:flex; gap:8px; padding:12px 16px 0;
-  }
-  .viewbar .seg{
-    flex:1; display:flex; background:var(--surface-2); border-radius:10px; padding:3px; gap:2px;
-  }
+  .viewbar{ display:flex; gap:8px; padding:12px 16px 0; }
+  .viewbar .seg{ flex:1; display:flex; background:var(--surface-2); border-radius:10px; padding:3px; gap:2px; }
   .seg button{
-    flex:1; border:none; background:transparent; padding:8px 6px; font-size:13px; font-weight:600;
+    flex:1; border:none; background:transparent; padding:9px 6px; font-size:13.5px; font-weight:600;
     color:var(--text-secondary); border-radius:8px;
     display:flex; align-items:center; justify-content:center; gap:6px;
   }
   .seg button.active{ background:var(--surface); color:var(--text); box-shadow:0 1px 3px rgba(0,0,0,0.08); }
 
-  /* ---------- Filters ---------- */
-  .filters{ padding:14px 16px 4px; display:flex; flex-direction:column; gap:10px; }
-  .filter-row{ display:flex; flex-direction:column; gap:6px; }
-  .filter-label{
-    font-size:10.5px; font-weight:700; text-transform:uppercase; letter-spacing:0.04em;
-    color:var(--text-tertiary);
-  }
-  .chip-scroll{
-    display:flex; gap:6px; overflow-x:auto; padding-bottom:2px;
-    scrollbar-width:none;
-  }
-  .chip-scroll::-webkit-scrollbar{ display:none; }
-  .chip{
-    flex-shrink:0;
-    display:flex; align-items:center; gap:6px;
-    padding:6px 12px; font-size:12.5px; font-weight:600;
-    border-radius:999px; border:1px solid var(--border);
+  /* ---------- Kid filter ---------- */
+  .kid-filters{ display:flex; gap:8px; padding:12px 16px 4px; }
+  .kid-chip{
+    flex:1; display:flex; align-items:center; justify-content:center; gap:7px;
+    padding:10px 8px; font-size:13.5px; font-weight:700;
+    border-radius:12px; border:2px solid var(--border);
     background:var(--surface); color:var(--text-secondary);
-    white-space:nowrap;
   }
-  .chip.active{ background:var(--surface-2); border-color:var(--border-strong); color:var(--text); }
-  .chip-dot{ width:8px;height:8px;border-radius:50%; flex-shrink:0; }
+  .kid-chip.active{ border-color:transparent; box-shadow:var(--shadow-postit); }
+  .kid-chip-dot{ width:10px;height:10px;border-radius:50%; flex-shrink:0; }
 
   /* ---------- Main ---------- */
   main{ padding:14px 16px 100px; }
@@ -112,12 +104,12 @@
   /* ---------- Calendar ---------- */
   .month-nav{ display:flex; align-items:center; gap:8px; margin-bottom:10px; }
   .nav-btn{
-    width:32px;height:32px;border-radius:9px;border:1px solid var(--border);
+    width:34px;height:34px;border-radius:10px;border:1px solid var(--border);
     background:var(--surface); display:flex;align-items:center;justify-content:center; color:var(--text-secondary);
   }
-  .month-label{ font-size:15.5px; font-weight:700; flex:1; text-align:center; }
+  .month-label{ font-size:16px; font-weight:700; flex:1; text-align:center; }
   .today-btn{
-    padding:7px 11px; font-size:12px; font-weight:600; border-radius:9px;
+    padding:7px 12px; font-size:12px; font-weight:600; border-radius:9px;
     border:1px solid var(--border); background:var(--surface); color:var(--text-secondary);
   }
 
@@ -130,68 +122,68 @@
   .day-cell{
     position:relative;
     aspect-ratio:1/1;
-    border-radius:9px;
-    border:1px solid transparent;
+    border-radius:10px;
+    border:2px solid transparent;
     background:var(--surface);
     display:flex; flex-direction:column; align-items:center; justify-content:flex-start;
-    padding:4px 2px 0;
+    padding:5px 2px 0;
   }
-  .day-cell.muted{ background:transparent; opacity:0.35; }
-  .day-cell.selected{ border-color:var(--accent); box-shadow:0 0 0 1px var(--accent); }
-  .day-num{ font-size:12.5px; font-weight:600; color:var(--text-secondary); }
+  .day-cell.muted{ background:transparent; opacity:0.32; }
+  .day-cell.selected{ border-color:var(--accent); }
+  .day-num{ font-size:13px; font-weight:600; color:var(--text-secondary); }
   .day-num.today{
-    color:#fff; background:var(--accent); width:20px;height:20px;border-radius:50%;
-    display:flex;align-items:center;justify-content:center; font-size:11px;
+    color:#fff; background:var(--accent); width:21px;height:21px;border-radius:50%;
+    display:flex;align-items:center;justify-content:center; font-size:11.5px;
   }
-  .day-dots{ display:flex; gap:2px; margin-top:3px; flex-wrap:wrap; justify-content:center; max-width:100%; }
-  .day-dot{ width:5px; height:5px; border-radius:50%; }
+  .day-dots{ display:flex; gap:3px; margin-top:4px; flex-wrap:wrap; justify-content:center; max-width:100%; }
+  .day-dot{ width:7px; height:7px; border-radius:50%; }
 
   /* Day detail panel below calendar */
-  .day-panel{
-    margin-top:18px; background:var(--surface); border:1px solid var(--border);
-    border-radius:var(--radius-lg); padding:14px;
-  }
-  .day-panel-header{ display:flex; align-items:center; justify-content:space-between; margin-bottom:10px; gap:8px;}
-  .day-panel-title{ font-size:14px; font-weight:700; margin:0; }
+  .day-panel{ margin-top:20px; }
+  .day-panel-header{ display:flex; align-items:center; justify-content:space-between; margin-bottom:12px; gap:8px;}
+  .day-panel-title{ font-size:15px; font-weight:700; margin:0; }
   .add-small-btn{
-    display:flex; align-items:center; gap:5px; padding:7px 11px; font-size:12.5px; font-weight:600;
-    border-radius:9px; border:1px solid var(--border-strong); background:var(--surface); color:var(--text); flex-shrink:0;
+    display:flex; align-items:center; gap:5px; padding:8px 12px; font-size:12.5px; font-weight:700;
+    border-radius:10px; border:none; background:var(--accent); color:#fff; flex-shrink:0;
   }
-  .empty-text{ font-size:13px; color:var(--text-tertiary); margin:0; }
+  .empty-text{ font-size:13.5px; color:var(--text-tertiary); text-align:center; padding:20px 0; }
 
   /* ---------- List view ---------- */
-  .list-group{ margin-bottom:18px; }
-  .list-group-date{ font-size:13px; font-weight:700; color:var(--text-secondary); margin-bottom:8px; display:block; }
-  .list-group-date.today{ color:var(--accent); }
+  .list-group{ margin-bottom:20px; }
+  .list-group-date{ font-size:13.5px; font-weight:700; color:var(--text-secondary); margin-bottom:9px; display:block; }
+  .list-group-date.today{ color:var(--accent-text); }
   .list-empty{ display:flex; flex-direction:column; align-items:center; gap:10px; padding:60px 0; color:var(--text-tertiary); }
 
-  /* ---------- Event card ---------- */
-  .ev-list{ display:flex; flex-direction:column; gap:8px; }
-  .ev-card{
-    display:flex; align-items:center; gap:10px; padding:11px 12px;
-    border-radius:var(--radius-md); border:1px solid var(--border); background:var(--surface);
+  /* ---------- Post-it event card ---------- */
+  .postit-list{ display:flex; flex-direction:column; gap:9px; }
+  .postit{
+    position:relative;
+    display:flex; align-items:center; gap:11px;
+    padding:13px 14px;
+    border-radius:13px;
+    box-shadow:var(--shadow-postit);
   }
-  .ev-icon{
-    width:34px;height:34px;border-radius:9px; flex-shrink:0;
-    display:flex; align-items:center; justify-content:center; font-size:16px;
+  .postit-stripe{
+    position:absolute; left:0; top:0; bottom:0; width:5px;
+    border-radius:13px 0 0 13px;
   }
-  .ev-body{ flex:1; min-width:0; }
-  .ev-title{ font-size:13.5px; font-weight:700; margin:0; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-  .ev-meta{ display:flex; gap:10px; margin-top:2px; flex-wrap:wrap; }
-  .ev-meta-item{ display:flex; align-items:center; gap:3px; font-size:11px; color:var(--text-tertiary); }
-  .ev-avatars{ display:flex; gap:4px; flex-shrink:0; }
-  .avatar{
-    width:22px;height:22px;border-radius:50%; display:flex;align-items:center;justify-content:center;
-    font-size:10px; font-weight:700; border:1.5px solid;
+  .postit-body{ flex:1; min-width:0; padding-left:4px; }
+  .postit-title{ font-size:14.5px; font-weight:700; margin:0; line-height:1.3; }
+  .postit-meta{ display:flex; gap:11px; margin-top:3px; flex-wrap:wrap; }
+  .postit-meta-item{ display:flex; align-items:center; gap:4px; font-size:11.5px; font-weight:500; opacity:0.75; }
+  .postit-kids{ display:flex; gap:4px; flex-shrink:0; }
+  .postit-kid-dot{
+    width:24px;height:24px;border-radius:50%; display:flex;align-items:center;justify-content:center;
+    font-size:11px; font-weight:700; border:2px solid rgba(255,255,255,0.6);
   }
 
   /* ---------- FAB ---------- */
   .fab{
     position:fixed; right:18px; bottom:calc(env(safe-area-inset-bottom) + 18px); z-index:30;
-    width:56px;height:56px;border-radius:50%;
+    width:58px;height:58px;border-radius:50%;
     background:var(--accent); color:#fff; border:none;
     display:flex;align-items:center;justify-content:center;
-    box-shadow:0 6px 18px rgba(15,110,86,0.4);
+    box-shadow:0 6px 18px rgba(123,122,201,0.45);
   }
 
   /* ---------- Overlay / Modal ---------- */
@@ -229,50 +221,62 @@
   .field{ display:flex; flex-direction:column; gap:6px; }
   .field-label{ font-size:12.5px; font-weight:700; color:var(--text-secondary); }
   .field-row{ display:grid; grid-template-columns:1fr 1fr; gap:10px; }
-  input[type=text], input[type=date], input[type=time], textarea{
-    height:42px; padding:0 12px; font-size:14.5px; border-radius:10px;
-    border:1px solid var(--border-strong); background:var(--surface); color:var(--text); width:100%;
+  input[type=text], input[type=date], input[type=time], input[type=password], textarea{
+    height:44px; padding:0 13px; font-size:15px; border-radius:11px;
+    border:1.5px solid var(--border-strong); background:var(--surface); color:var(--text); width:100%;
   }
-  textarea{ height:auto; padding:10px 12px; resize:vertical; min-height:64px; }
-  input:focus, textarea:focus{ outline:none; border-color:var(--accent); box-shadow:0 0 0 3px rgba(15,110,86,0.15); }
+  textarea{ height:auto; padding:11px 13px; resize:vertical; min-height:64px; }
+  input:focus, textarea:focus{ outline:none; border-color:var(--accent); box-shadow:0 0 0 3px rgba(123,122,201,0.18); }
 
-  .opt-grid{ display:flex; flex-wrap:wrap; gap:7px; }
-  .opt-btn{
-    display:flex; align-items:center; gap:6px; padding:8px 12px; font-size:12.5px; font-weight:600;
-    border-radius:10px; border:1.5px solid var(--border); background:var(--surface); color:var(--text-secondary);
+  .kid-pick-grid{ display:flex; gap:8px; }
+  .kid-pick-btn{
+    flex:1; display:flex; flex-direction:column; align-items:center; gap:5px;
+    padding:14px 8px; font-size:13.5px; font-weight:700;
+    border-radius:13px; border:2px solid var(--border); background:var(--surface); color:var(--text-secondary);
   }
-  .opt-btn.active{ }
+  .kid-pick-btn.active{ border-color:transparent; box-shadow:var(--shadow-postit); }
+  .kid-pick-avatar{
+    width:34px;height:34px;border-radius:50%; display:flex;align-items:center;justify-content:center;
+    font-size:14px; font-weight:700;
+  }
 
   .primary-btn{
     display:flex; align-items:center; gap:6px; justify-content:center;
-    padding:11px 16px; font-size:13.5px; font-weight:700; border:none; border-radius:11px;
+    padding:12px 16px; font-size:14px; font-weight:700; border:none; border-radius:12px;
     background:var(--accent); color:#fff;
   }
   .primary-btn:disabled{ opacity:0.4; }
   .secondary-btn{
-    padding:11px 16px; font-size:13.5px; font-weight:700; border-radius:11px;
-    border:1px solid var(--border-strong); background:var(--surface); color:var(--text);
+    padding:12px 16px; font-size:14px; font-weight:700; border-radius:12px;
+    border:1.5px solid var(--border-strong); background:var(--surface); color:var(--text);
   }
   .danger-btn{
     display:flex; align-items:center; gap:6px; padding:10px 13px; font-size:13px; font-weight:700;
-    border-radius:10px; border:1px solid var(--danger-border); background:transparent; color:var(--danger);
+    border-radius:10px; border:1.5px solid var(--danger-border); background:transparent; color:var(--danger);
   }
   .danger-btn-filled{
-    padding:11px 16px; font-size:13.5px; font-weight:700; border-radius:11px;
+    padding:12px 16px; font-size:14px; font-weight:700; border-radius:12px;
     border:none; background:var(--danger); color:#fff;
   }
 
-  /* members modal */
-  .member-row{
-    display:flex; align-items:center; justify-content:space-between; padding:10px 12px;
-    border-radius:10px; border:1px solid var(--border); margin-bottom:7px;
+  /* kids management modal */
+  .kid-row{
+    display:flex; align-items:center; justify-content:space-between; padding:11px 13px;
+    border-radius:12px; border:1.5px solid var(--border); margin-bottom:8px;
   }
-  .member-row-left{ display:flex; align-items:center; gap:9px; font-size:14px; font-weight:600; }
-  .add-member-row{ display:flex; gap:8px; margin-top:6px; }
+  .kid-row-left{ display:flex; align-items:center; gap:10px; font-size:14.5px; font-weight:700; }
+  .add-kid-row{ display:flex; gap:8px; margin-top:6px; }
   .icon-btn-sm{
-    width:30px;height:30px;border-radius:8px;border:1px solid var(--border); background:transparent;
+    width:32px;height:32px;border-radius:9px;border:1.5px solid var(--border); background:transparent;
     display:flex;align-items:center;justify-content:center;color:var(--danger);
   }
+  .color-pick-row{ display:flex; gap:8px; flex-wrap:wrap; }
+  .color-pick-dot{
+    width:30px;height:30px;border-radius:50%; border:2px solid transparent; flex-shrink:0;
+  }
+  .color-pick-dot.active{ border-color:var(--text); }
+
+  .hint-text{ font-size:12.5px; color:var(--text-tertiary); }
 
   /* svg icon helper */
   svg{ display:block; }
@@ -284,7 +288,7 @@
     padding:24px; text-align:center;
   }
   #lock-screen .lock-logo{
-    width:56px;height:56px;border-radius:16px; background:var(--accent);
+    width:58px;height:58px;border-radius:17px; background:var(--accent);
     display:flex; align-items:center; justify-content:center; margin-bottom:18px;
   }
   #lock-screen h1{ font-size:19px; font-weight:700; margin:0 0 4px; }
@@ -297,21 +301,13 @@
   #lock-error{ color:var(--danger); font-size:12.5px; margin-top:10px; min-height:16px; }
   #lock-screen .sync-status{ font-size:11.5px; color:var(--text-tertiary); margin-top:18px; }
   .app-hidden{ display:none !important; }
-
-  /* ---------- Sync indicator ---------- */
-  .sync-badge{
-    display:flex; align-items:center; gap:5px; font-size:10.5px; color:rgba(255,255,255,0.85);
-    margin-top:2px;
-  }
-  .sync-dot{ width:6px;height:6px;border-radius:50%; background:#7BE0B0; flex-shrink:0; }
-  .sync-dot.offline{ background:#F0B05A; }
 </style>
 </head>
 <body>
 
 <div id="lock-screen">
   <div class="lock-logo">
-    <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+    <svg width="27" height="27" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
   </div>
   <h1>Agenda familial</h1>
   <p>Entre le code d'accès partagé pour voir et modifier l'agenda de la famille.</p>
@@ -334,7 +330,7 @@
     </div>
   </div>
   <div class="topbar-actions">
-    <button class="icon-btn" id="btn-members" aria-label="Gérer les membres">
+    <button class="icon-btn" id="btn-members" aria-label="Gérer les enfants">
       <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
     </button>
   </div>
@@ -353,21 +349,12 @@
   </div>
 </div>
 
-<div class="filters">
-  <div class="filter-row">
-    <span class="filter-label">Famille</span>
-    <div class="chip-scroll" id="member-filters"></div>
-  </div>
-  <div class="filter-row">
-    <span class="filter-label">Catégorie</span>
-    <div class="chip-scroll" id="category-filters"></div>
-  </div>
-</div>
+<div class="kid-filters" id="kid-filters"></div>
 
 <main id="main-content"></main>
 
 <button class="fab" id="fab-add" aria-label="Nouveau rendez-vous">
-  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+  <svg width="25" height="25" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
 </button>
 
 <div id="modal-root"></div>
@@ -379,41 +366,21 @@
   "use strict";
 
   // ---------- Config ----------
-  var MEMBER_COLORS = [
-    { key:"violet", dot:"#7F77DD", bg:"#EEEDFE", border:"#AFA9EC", text:"#3C3489" },
-    { key:"teal",   dot:"#1D9E75", bg:"#E1F5EE", border:"#5DCAA5", text:"#085041" },
-    { key:"corail", dot:"#D85A30", bg:"#FAECE7", border:"#F0997B", text:"#712B13" },
-    { key:"rose",   dot:"#D4537E", bg:"#FBEAF0", border:"#ED93B1", text:"#72243E" },
-    { key:"bleu",   dot:"#378ADD", bg:"#E6F1FB", border:"#85B7EB", text:"#0C447C" },
-    { key:"ambre",  dot:"#BA7517", bg:"#FAEEDA", border:"#EF9F27", text:"#633806" }
+  var KID_COLORS = [
+    { key:"blueviolet", dot:"#9C9BE0", bg:"#EFEEFB", border:"#C2C0EF", text:"#3C3489" },
+    { key:"yellow",     dot:"#E8C24D", bg:"#FBF3DE", border:"#EFD988", text:"#6B4E0A" },
+    { key:"teal",       dot:"#5DCAA5", bg:"#E1F5EE", border:"#9DDFC6", text:"#085041" },
+    { key:"corail",     dot:"#F0997B", bg:"#FAECE7", border:"#F3B69E", text:"#712B13" },
+    { key:"rose",       dot:"#ED93B1", bg:"#FBEAF0", border:"#F2B3C7", text:"#72243E" },
+    { key:"bleu",       dot:"#85B7EB", bg:"#E6F1FB", border:"#AED0F2", text:"#0C447C" }
   ];
 
-  var ICONS = {
-    medical:'<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg>',
-    sport:'<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/></svg>',
-    ecole:'<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg>',
-    sortie:'<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v4M3 12h4M19 12h2M12 19v2M5 5l2 2M17 5l-2 2M5 19l2-2M19 19l-2-2"/><circle cx="12" cy="12" r="4"/></svg>',
-    famille:'<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>',
-    autre:'<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/></svg>'
-  };
-
-  var CATEGORIES = [
-    { key:"medical", label:"Médical", color:"#D85A30", bg:"#FAECE7", text:"#712B13" },
-    { key:"sport",   label:"Sport",   color:"#1D9E75", bg:"#E1F5EE", text:"#085041" },
-    { key:"ecole",   label:"École",   color:"#378ADD", bg:"#E6F1FB", text:"#0C447C" },
-    { key:"sortie",  label:"Sortie",  color:"#D4537E", bg:"#FBEAF0", text:"#72243E" },
-    { key:"famille", label:"Famille", color:"#7F77DD", bg:"#EEEDFE", text:"#3C3489" },
-    { key:"autre",   label:"Autre",   color:"#888780", bg:"#F1EFE8", text:"#444441" }
-  ];
-
-  var DEFAULT_MEMBERS = [
-    { id:"m1", name:"Maman", color:"violet" },
-    { id:"m2", name:"Papa", color:"teal" },
-    { id:"m3", name:"Enfant", color:"corail" }
+  var DEFAULT_KIDS = [
+    { id:"k1", name:"Nina", color:"blueviolet" },
+    { id:"k2", name:"Ilhan", color:"yellow" }
   ];
 
   // ---------- Firebase config ----------
-  // ⚠️ Remplace les valeurs ci-dessous par celles de TON projet Firebase
   var FIREBASE_CONFIG = {
     apiKey: "AIzaSyB8fcfs1yvXP0xY4WIT8TN_K2T3nmAjJC8",
     authDomain: "agenda-familial-34a85.firebaseapp.com",
@@ -429,15 +396,13 @@
   var DAYS_LONG = ["Dimanche","Lundi","Mardi","Mercredi","Jeudi","Vendredi","Samedi"];
 
   // ---------- State ----------
-  var state = { events:[], members:DEFAULT_MEMBERS.slice() };
+  var state = { events:[], members: DEFAULT_KIDS.slice() };
   var view = "calendar";
   var cursor = (function(){ var d=new Date(); return new Date(d.getFullYear(), d.getMonth(), 1); })();
   var selectedDate = toISO(new Date());
-  var filterMember = "all";
-  var filterCategory = "all";
+  var filterKid = "all";
   var db = null;
   var docRef = null;
-  var accessCode = null;
   var applyingRemoteUpdate = false;
   var saveDebounceTimer = null;
 
@@ -446,13 +411,10 @@
   function pad(n){ return String(n).padStart(2,"0"); }
   function toISO(d){ return d.getFullYear()+"-"+pad(d.getMonth()+1)+"-"+pad(d.getDate()); }
   function fromISO(s){ var p=s.split("-").map(Number); return new Date(p[0],p[1]-1,p[2]); }
-  function getCat(key){ for(var i=0;i<CATEGORIES.length;i++){ if(CATEGORIES[i].key===key) return CATEGORIES[i]; } return CATEGORIES[CATEGORIES.length-1]; }
-  function getMemberColor(key){ for(var i=0;i<MEMBER_COLORS.length;i++){ if(MEMBER_COLORS[i].key===key) return MEMBER_COLORS[i]; } return MEMBER_COLORS[0]; }
+  function getKidColor(key){ for(var i=0;i<KID_COLORS.length;i++){ if(KID_COLORS[i].key===key) return KID_COLORS[i]; } return KID_COLORS[0]; }
   function formatDateLong(iso){ var d=fromISO(iso); return DAYS_LONG[d.getDay()]+" "+d.getDate()+" "+MONTHS[d.getMonth()]+" "+d.getFullYear(); }
   function esc(s){ var div=document.createElement("div"); div.textContent = s==null? "":s; return div.innerHTML; }
 
-  // Transforme le code d'accès en identifiant de document stable (sans jamais
-  // exposer le code lui-même en clair dans la base).
   function codeToDocId(code){
     var normalized = code.trim().toLowerCase();
     var hash = 0;
@@ -472,7 +434,6 @@
 
   // ---------- Firebase init & sync ----------
   function initFirebaseAndConnect(code){
-    accessCode = code;
     try{
       if(!firebase.apps || !firebase.apps.length){
         firebase.initializeApp(FIREBASE_CONFIG);
@@ -487,8 +448,7 @@
 
     docRef.get().then(function(snap){
       if(!snap.exists){
-        // Premier accès avec ce code : on crée le document partagé
-        return docRef.set({ events:[], members:DEFAULT_MEMBERS.slice(), updatedAt: Date.now() });
+        return docRef.set({ events:[], members: DEFAULT_KIDS.slice(), updatedAt: Date.now() });
       }
     }).then(function(){
       localStorage.setItem(LOCAL_CODE_KEY, code);
@@ -506,7 +466,7 @@
       var data = snap.data();
       applyingRemoteUpdate = true;
       state.events = Array.isArray(data.events) ? data.events : [];
-      state.members = Array.isArray(data.members) && data.members.length ? data.members : DEFAULT_MEMBERS.slice();
+      state.members = Array.isArray(data.members) && data.members.length ? data.members : DEFAULT_KIDS.slice();
       applyingRemoteUpdate = false;
       setSyncStatus("Synchronisé");
       renderAll();
@@ -540,8 +500,7 @@
 
   function filteredEvents(){
     return state.events.filter(function(e){
-      if(filterMember!=="all" && e.memberIds.indexOf(filterMember)===-1) return false;
-      if(filterCategory!=="all" && e.category!==filterCategory) return false;
+      if(filterKid!=="all" && e.memberIds.indexOf(filterKid)===-1) return false;
       return true;
     });
   }
@@ -558,42 +517,37 @@
     return map;
   }
 
-  // ---------- Render: filter chips ----------
-  function renderFilters(){
-    var mWrap = document.getElementById("member-filters");
-    var cWrap = document.getElementById("category-filters");
-    mWrap.innerHTML = "";
-    cWrap.innerHTML = "";
+  // ---------- Render: kid filter chips ----------
+  function renderKidFilters(){
+    var wrap = document.getElementById("kid-filters");
+    wrap.innerHTML = "";
 
-    mWrap.appendChild(makeChip("Tous", filterMember==="all", function(){ filterMember="all"; renderAll(); }, null));
+    var allBtn = document.createElement("button");
+    allBtn.className = "kid-chip" + (filterKid==="all" ? " active" : "");
+    if(filterKid==="all"){ allBtn.style.background = "var(--surface-2)"; allBtn.style.color="var(--text)"; }
+    allBtn.textContent = "Tous";
+    allBtn.addEventListener("click", function(){ filterKid="all"; renderAll(); });
+    wrap.appendChild(allBtn);
+
     state.members.forEach(function(m){
-      var c = getMemberColor(m.color);
-      mWrap.appendChild(makeChip(m.name, filterMember===m.id, function(){ filterMember=m.id; renderAll(); }, c.dot));
-    });
-
-    cWrap.appendChild(makeChip("Toutes", filterCategory==="all", function(){ filterCategory="all"; renderAll(); }, null));
-    CATEGORIES.forEach(function(c){
-      cWrap.appendChild(makeChip(c.label, filterCategory===c.key, function(){ filterCategory=c.key; renderAll(); }, c.color));
-    });
-  }
-
-  function makeChip(label, active, onClick, dotColor){
-    var btn = document.createElement("button");
-    btn.className = "chip" + (active ? " active" : "");
-    if(dotColor){
+      var c = getKidColor(m.color);
+      var btn = document.createElement("button");
+      var active = filterKid===m.id;
+      btn.className = "kid-chip" + (active ? " active" : "");
+      if(active){ btn.style.background = c.bg; btn.style.color = c.text; }
       var dot = document.createElement("span");
-      dot.className = "chip-dot";
-      dot.style.background = dotColor;
+      dot.className = "kid-chip-dot";
+      dot.style.background = c.dot;
       btn.appendChild(dot);
-    }
-    btn.appendChild(document.createTextNode(label));
-    btn.addEventListener("click", onClick);
-    return btn;
+      btn.appendChild(document.createTextNode(m.name));
+      btn.addEventListener("click", function(){ filterKid=m.id; renderAll(); });
+      wrap.appendChild(btn);
+    });
   }
 
   // ---------- Render: main content ----------
   function renderAll(){
-    renderFilters();
+    renderKidFilters();
     document.getElementById("seg-cal").classList.toggle("active", view==="calendar");
     document.getElementById("seg-list").classList.toggle("active", view==="list");
     if(view==="calendar") renderCalendar(); else renderList();
@@ -646,9 +600,15 @@
       html += '<span class="day-num'+(isToday?" today":"")+'">'+cell.date.getDate()+'</span>';
       if(dayEvents.length>0){
         html += '<div class="day-dots">';
-        dayEvents.slice(0,4).forEach(function(ev){
-          var cat = getCat(ev.category);
-          html += '<span class="day-dot" style="background:'+cat.color+'"></span>';
+        var seenKids = {};
+        dayEvents.forEach(function(ev){
+          (ev.memberIds.length ? ev.memberIds : ["_none"]).forEach(function(mid){
+            if(seenKids[mid]) return;
+            seenKids[mid] = true;
+            var member = state.members.find(function(m){ return m.id===mid; });
+            var color = member ? getKidColor(member.color).dot : "#C7C4B8";
+            html += '<span class="day-dot" style="background:'+color+'"></span>';
+          });
         });
         html += '</div>';
       }
@@ -663,8 +623,8 @@
     if(selDayEvents.length===0){
       html += '<p class="empty-text">Aucun rendez-vous ce jour-là.</p>';
     } else {
-      html += '<div class="ev-list">';
-      selDayEvents.forEach(function(ev){ html += eventCardHTML(ev); });
+      html += '<div class="postit-list">';
+      selDayEvents.forEach(function(ev){ html += postitHTML(ev); });
       html += '</div>';
     }
     html += '</div>';
@@ -687,7 +647,7 @@
         renderCalendar();
       });
     });
-    main.querySelectorAll(".ev-card").forEach(function(el){
+    main.querySelectorAll(".postit").forEach(function(el){
       el.addEventListener("click", function(){
         var id = el.getAttribute("data-id");
         var ev = state.events.find(function(e){ return e.id===id; });
@@ -718,15 +678,15 @@
     dates.forEach(function(date){
       html += '<div class="list-group">';
       html += '<span class="list-group-date'+(date===today?" today":"")+'">'+esc(formatDateLong(date))+'</span>';
-      html += '<div class="ev-list">';
+      html += '<div class="postit-list">';
       map[date].sort(function(a,b){ return (a.time||"99:99").localeCompare(b.time||"99:99"); }).forEach(function(ev){
-        html += eventCardHTML(ev);
+        html += postitHTML(ev);
       });
       html += '</div></div>';
     });
     main.innerHTML = html;
 
-    main.querySelectorAll(".ev-card").forEach(function(el){
+    main.querySelectorAll(".postit").forEach(function(el){
       el.addEventListener("click", function(){
         var id = el.getAttribute("data-id");
         var ev = state.events.find(function(e){ return e.id===id; });
@@ -735,24 +695,25 @@
     });
   }
 
-  function eventCardHTML(ev){
-    var cat = getCat(ev.category);
+  function postitHTML(ev){
     var members = state.members.filter(function(m){ return ev.memberIds.indexOf(m.id)!==-1; });
-    var html = '<div class="ev-card" data-id="'+ev.id+'">';
-    html += '<div class="ev-icon" style="background:'+cat.bg+';color:'+cat.text+'">'+ICONS[cat.key]+'</div>';
-    html += '<div class="ev-body"><p class="ev-title">'+esc(ev.title)+'</p><div class="ev-meta">';
+    var primaryColor = members.length ? getKidColor(members[0].color) : { bg:"#F1EFE8", text:"#444441", dot:"#C7C4B8" };
+
+    var html = '<div class="postit" data-id="'+ev.id+'" style="background:'+primaryColor.bg+';color:'+primaryColor.text+'">';
+    html += '<div class="postit-stripe" style="background:'+primaryColor.dot+'"></div>';
+    html += '<div class="postit-body"><p class="postit-title">'+esc(ev.title)+'</p><div class="postit-meta">';
     if(ev.time){
-      html += '<span class="ev-meta-item"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>'+esc(ev.time)+'</span>';
+      html += '<span class="postit-meta-item"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>'+esc(ev.time)+'</span>';
     }
     if(ev.location){
-      html += '<span class="ev-meta-item"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>'+esc(ev.location)+'</span>';
+      html += '<span class="postit-meta-item"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>'+esc(ev.location)+'</span>';
     }
     html += '</div></div>';
     if(members.length>0){
-      html += '<div class="ev-avatars">';
+      html += '<div class="postit-kids">';
       members.forEach(function(m){
-        var c = getMemberColor(m.color);
-        html += '<div class="avatar" style="background:'+c.bg+';color:'+c.text+';border-color:'+c.border+'" title="'+esc(m.name)+'">'+esc(m.name.charAt(0).toUpperCase())+'</div>';
+        var c = getKidColor(m.color);
+        html += '<div class="postit-kid-dot" style="background:'+c.dot+';color:'+c.text+'" title="'+esc(m.name)+'">'+esc(m.name.charAt(0).toUpperCase())+'</div>';
       });
       html += '</div>';
     }
@@ -766,7 +727,7 @@
   function openEventModal(ev, dateForNew){
     currentForm = ev ? Object.assign({}, ev, { memberIds: ev.memberIds.slice() }) : {
       id:null, title:"", date: dateForNew || selectedDate || todayISO(),
-      time:"", location:"", category:"famille", memberIds:[], notes:""
+      time:"", location:"", memberIds:[], notes:""
     };
     renderEventModal();
   }
@@ -781,6 +742,21 @@
     html += '<button class="close-btn" id="ev-close" aria-label="Fermer"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button></div>';
 
     html += '<div class="modal-body">';
+
+    html += '<div class="field"><label class="field-label">Pour qui ?</label><div class="kid-pick-grid" id="f-kids">';
+    state.members.forEach(function(m){
+      var c = getKidColor(m.color);
+      var active = f.memberIds.indexOf(m.id)!==-1;
+      var style = active ? ('background:'+c.bg+';border-color:'+c.dot+';color:'+c.text) : '';
+      html += '<button type="button" class="kid-pick-btn'+(active?" active":"")+'" data-member="'+m.id+'" style="'+style+'">';
+      html += '<span class="kid-pick-avatar" style="background:'+c.dot+';color:'+c.text+'">'+esc(m.name.charAt(0).toUpperCase())+'</span>';
+      html += esc(m.name)+'</button>';
+    });
+    html += '</div></div>';
+    if(state.members.length===0){
+      html += '<p class="hint-text">Ajoute Nina, Ilhan ou un autre enfant via l\'icône en haut.</p>';
+    }
+
     html += '<div class="field"><label class="field-label">Titre</label><input type="text" id="f-title" placeholder="Ex. Rendez-vous dentiste" value="'+esc(f.title)+'"></div>';
 
     html += '<div class="field-row">';
@@ -789,26 +765,6 @@
     html += '</div>';
 
     html += '<div class="field"><label class="field-label">Lieu (optionnel)</label><input type="text" id="f-location" placeholder="Ex. Cabinet du Dr Martin" value="'+esc(f.location)+'"></div>';
-
-    html += '<div class="field"><label class="field-label">Catégorie</label><div class="opt-grid" id="f-categories">';
-    CATEGORIES.forEach(function(c){
-      var active = f.category===c.key;
-      var style = active ? ('background:'+c.bg+';color:'+c.text+';border-color:'+c.color) : '';
-      html += '<button type="button" class="opt-btn'+(active?" active":"")+'" data-cat="'+c.key+'" style="'+style+'">'+ICONS[c.key]+c.label+'</button>';
-    });
-    html += '</div></div>';
-
-    html += '<div class="field"><label class="field-label">Concerne</label><div class="opt-grid" id="f-members">';
-    if(state.members.length===0){
-      html += '<p class="empty-text">Ajoute des membres via le bouton en haut.</p>';
-    }
-    state.members.forEach(function(m){
-      var c = getMemberColor(m.color);
-      var active = f.memberIds.indexOf(m.id)!==-1;
-      var style = active ? ('background:'+c.bg+';color:'+c.text+';border-color:'+c.dot) : '';
-      html += '<button type="button" class="opt-btn'+(active?" active":"")+'" data-member="'+m.id+'" style="'+style+'"><span class="chip-dot" style="background:'+c.dot+'"></span>'+esc(m.name)+'</button>';
-    });
-    html += '</div></div>';
 
     html += '<div class="field"><label class="field-label">Notes (optionnel)</label><textarea id="f-notes" placeholder="Détails supplémentaires...">'+esc(f.notes)+'</textarea></div>';
     html += '</div>';
@@ -820,7 +776,7 @@
       html += '<span></span>';
     }
     html += '<div class="footer-actions"><button class="secondary-btn" id="ev-cancel">Annuler</button>';
-    html += '<button class="primary-btn" id="ev-save">'+(isEdit?"Enregistrer":"Créer le rendez-vous")+'</button></div>';
+    html += '<button class="primary-btn" id="ev-save">'+(isEdit?"Enregistrer":"Créer")+'</button></div>';
     html += '</div></div></div>';
 
     root.innerHTML = html;
@@ -835,13 +791,7 @@
     document.getElementById("f-location").addEventListener("input", function(e){ currentForm.location = e.target.value; });
     document.getElementById("f-notes").addEventListener("input", function(e){ currentForm.notes = e.target.value; });
 
-    root.querySelectorAll("#f-categories .opt-btn").forEach(function(btn){
-      btn.addEventListener("click", function(){
-        currentForm.category = btn.getAttribute("data-cat");
-        renderEventModal();
-      });
-    });
-    root.querySelectorAll("#f-members .opt-btn").forEach(function(btn){
+    root.querySelectorAll("#f-kids .kid-pick-btn").forEach(function(btn){
       btn.addEventListener("click", function(){
         var id = btn.getAttribute("data-member");
         var idx = currentForm.memberIds.indexOf(id);
@@ -908,35 +858,43 @@
     });
   }
 
-  // ---------- Members modal ----------
-  function openMembersModal(){
-    var root = document.getElementById("modal-root");
-    renderMembersModal();
-  }
+  // ---------- Kids (members) management modal ----------
+  function openMembersModal(){ renderMembersModal(); }
 
   function renderMembersModal(){
     var root = document.getElementById("modal-root");
     var html = '<div class="overlay" id="mem-overlay"><div class="modal" style="max-width:420px;">';
-    html += '<div class="modal-header"><h2 class="modal-title">Membres de la famille</h2>';
+    html += '<div class="modal-header"><h2 class="modal-title">Enfants</h2>';
     html += '<button class="close-btn" id="mem-close" aria-label="Fermer"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button></div>';
     html += '<div class="modal-body">';
 
     if(state.members.length===0){
-      html += '<p class="empty-text">Aucun membre pour l\'instant.</p>';
+      html += '<p class="hint-text">Aucun enfant pour l\'instant.</p>';
     } else {
       state.members.forEach(function(m){
-        var c = getMemberColor(m.color);
-        html += '<div class="member-row"><div class="member-row-left"><span class="chip-dot" style="background:'+c.dot+';width:10px;height:10px;"></span><span>'+esc(m.name)+'</span></div>';
+        var c = getKidColor(m.color);
+        html += '<div class="kid-row"><div class="kid-row-left"><span class="kid-pick-avatar" style="width:26px;height:26px;font-size:11px;background:'+c.dot+';color:'+c.text+'">'+esc(m.name.charAt(0).toUpperCase())+'</span><span>'+esc(m.name)+'</span></div>';
         html += '<button class="icon-btn-sm" data-remove="'+m.id+'" aria-label="Supprimer '+esc(m.name)+'"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg></button></div>';
       });
     }
 
-    html += '<div class="add-member-row"><input type="text" id="new-member-name" placeholder="Nom du membre" style="flex:1;"><button class="primary-btn" id="add-member-btn" style="flex-shrink:0;"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Ajouter</button></div>';
+    html += '<div class="field" style="margin-top:8px;"><label class="field-label">Ajouter un enfant</label>';
+    html += '<div class="add-kid-row"><input type="text" id="new-kid-name" placeholder="Prénom" style="flex:1;"></div>';
+    html += '<div class="color-pick-row" id="new-kid-colors" style="margin-top:9px;">';
+    KID_COLORS.forEach(function(c, idx){
+      html += '<button type="button" class="color-pick-dot'+(idx===0?" active":"")+'" data-color="'+c.key+'" style="background:'+c.dot+'"></button>';
+    });
+    html += '</div>';
+    html += '<button class="primary-btn" id="add-kid-btn" style="margin-top:11px;width:100%;"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Ajouter</button>';
+    html += '</div>';
+
     html += '</div>';
     html += '<div class="modal-footer"><span></span><button class="secondary-btn" id="mem-done">Fermer</button></div>';
     html += '</div></div>';
 
     root.innerHTML = html;
+
+    var selectedColor = KID_COLORS[0].key;
 
     document.getElementById("mem-close").addEventListener("click", closeMembersModal);
     document.getElementById("mem-done").addEventListener("click", closeMembersModal);
@@ -945,32 +903,39 @@
     root.querySelectorAll("[data-remove]").forEach(function(btn){
       btn.addEventListener("click", function(){
         var id = btn.getAttribute("data-remove");
-        state.members = state.members.filter(function(m){ return m.id!==id; });
-        state.events = state.events.map(function(e){
-          return Object.assign({}, e, { memberIds: e.memberIds.filter(function(mid){ return mid!==id; }) });
+        openConfirmDialog("Supprimer cet enfant ? Les rendez-vous associés resteront mais ne lui seront plus liés.", function(){
+          state.members = state.members.filter(function(m){ return m.id!==id; });
+          state.events = state.events.map(function(e){
+            return Object.assign({}, e, { memberIds: e.memberIds.filter(function(mid){ return mid!==id; }) });
+          });
+          if(filterKid===id) filterKid="all";
+          saveState();
+          renderMembersModal();
+          renderAll();
         });
-        if(filterMember===id) filterMember="all";
-        saveState();
-        renderMembersModal();
-        renderAll();
       });
     });
 
-    function addMember(){
-      var input = document.getElementById("new-member-name");
+    root.querySelectorAll("#new-kid-colors .color-pick-dot").forEach(function(btn){
+      btn.addEventListener("click", function(){
+        selectedColor = btn.getAttribute("data-color");
+        root.querySelectorAll("#new-kid-colors .color-pick-dot").forEach(function(b){ b.classList.remove("active"); });
+        btn.classList.add("active");
+      });
+    });
+
+    function addKid(){
+      var input = document.getElementById("new-kid-name");
       var name = input.value.trim();
       if(!name) return;
-      var usedColors = state.members.map(function(m){ return m.color; });
-      var nextColor = MEMBER_COLORS.find(function(c){ return usedColors.indexOf(c.key)===-1; });
-      var colorKey = nextColor ? nextColor.key : MEMBER_COLORS[state.members.length % MEMBER_COLORS.length].key;
-      state.members.push({ id: uid(), name: name, color: colorKey });
+      state.members.push({ id: uid(), name: name, color: selectedColor });
       saveState();
       renderMembersModal();
       renderAll();
     }
-    document.getElementById("add-member-btn").addEventListener("click", addMember);
-    document.getElementById("new-member-name").addEventListener("keydown", function(e){
-      if(e.key==="Enter") addMember();
+    document.getElementById("add-kid-btn").addEventListener("click", addKid);
+    document.getElementById("new-kid-name").addEventListener("keydown", function(e){
+      if(e.key==="Enter") addKid();
     });
   }
 
