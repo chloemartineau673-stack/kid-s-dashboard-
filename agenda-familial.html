@@ -26,11 +26,14 @@
     --danger:#A32D2D;
     --danger-bg:#FCEBEB;
     --danger-border:#F09595;
+    --nina-dot:#9C9BE0; --nina-bg:#EFEEFB; --nina-border:#C2C0EF; --nina-text:#3C3489;
+    --ilhan-dot:#E8C24D; --ilhan-bg:#FBF3DE; --ilhan-border:#EFD988; --ilhan-text:#6B4E0A;
+    --notes-dot:#9BC9A8; --notes-bg:#E9F5EC; --notes-border:#BBE0C7; --notes-text:#1F5A35;
     --radius-sm:6px;
     --radius-md:10px;
     --radius-lg:16px;
     --shadow-modal:0 12px 32px rgba(30,28,20,0.18);
-    --shadow-postit:0 2px 6px rgba(40,35,20,0.10);
+    --shadow-postit:0 3px 8px rgba(40,35,20,0.10);
   }
   *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
   html,body{margin:0;padding:0;}
@@ -69,122 +72,128 @@
   }
   .icon-btn:hover{ background:rgba(255,255,255,0.26); }
 
-  /* ---------- Sync indicator ---------- */
-  .sync-badge{
-    display:flex; align-items:center; gap:5px; font-size:10.5px; color:rgba(255,255,255,0.85);
-    margin-top:2px;
-  }
+  .sync-badge{ display:flex; align-items:center; gap:5px; font-size:10.5px; color:rgba(255,255,255,0.85); margin-top:2px; }
   .sync-dot{ width:6px;height:6px;border-radius:50%; background:#7BE0B0; flex-shrink:0; }
   .sync-dot.offline{ background:#F0B05A; }
 
-  /* ---------- View toggle ---------- */
-  .viewbar{ display:flex; gap:8px; padding:12px 16px 0; }
-  .viewbar .seg{ flex:1; display:flex; background:var(--surface-2); border-radius:10px; padding:3px; gap:2px; }
-  .seg button{
-    flex:1; border:none; background:transparent; padding:9px 6px; font-size:13.5px; font-weight:600;
-    color:var(--text-secondary); border-radius:8px;
-    display:flex; align-items:center; justify-content:center; gap:6px;
-  }
-  .seg button.active{ background:var(--surface); color:var(--text); box-shadow:0 1px 3px rgba(0,0,0,0.08); }
+  /* ---------- Main layout ---------- */
+  main{ padding:16px 14px 28px; }
 
-  /* ---------- Kid filter ---------- */
-  .kid-filters{ display:flex; gap:8px; padding:12px 16px 4px; }
-  .kid-chip{
-    flex:1; display:flex; align-items:center; justify-content:center; gap:7px;
-    padding:10px 8px; font-size:13.5px; font-weight:700;
-    border-radius:12px; border:2px solid var(--border);
-    background:var(--surface); color:var(--text-secondary);
-  }
-  .kid-chip.active{ border-color:transparent; box-shadow:var(--shadow-postit); }
-  .kid-chip-dot{ width:10px;height:10px;border-radius:50%; flex-shrink:0; }
-
-  /* ---------- Main ---------- */
-  main{ padding:14px 16px 100px; }
-
-  /* ---------- Calendar ---------- */
-  .month-nav{ display:flex; align-items:center; gap:8px; margin-bottom:10px; }
-  .nav-btn{
-    width:34px;height:34px;border-radius:10px;border:1px solid var(--border);
-    background:var(--surface); display:flex;align-items:center;justify-content:center; color:var(--text-secondary);
-  }
-  .month-label{ font-size:16px; font-weight:700; flex:1; text-align:center; }
-  .today-btn{
-    padding:7px 12px; font-size:12px; font-weight:600; border-radius:9px;
-    border:1px solid var(--border); background:var(--surface); color:var(--text-secondary);
+  .kids-row{
+    display:grid; grid-template-columns:1fr 1fr; gap:11px;
+    margin-bottom:14px;
   }
 
-  .weekday-row{ display:grid; grid-template-columns:repeat(7,1fr); margin-bottom:4px; }
-  .weekday-cell{
-    text-align:center; font-size:10.5px; font-weight:700; color:var(--text-tertiary);
-    text-transform:uppercase; padding:4px 0;
-  }
-  .cal-grid{ display:grid; grid-template-columns:repeat(7,1fr); gap:3px; }
-  .day-cell{
-    position:relative;
-    aspect-ratio:1/1;
-    border-radius:10px;
-    border:2px solid transparent;
+  .kid-card{
+    border-radius:18px;
+    border:2.5px solid;
     background:var(--surface);
-    display:flex; flex-direction:column; align-items:center; justify-content:flex-start;
-    padding:5px 2px 0;
+    overflow:hidden;
+    display:flex; flex-direction:column;
   }
-  .day-cell.muted{ background:transparent; opacity:0.32; }
-  .day-cell.selected{ border-color:var(--accent); }
-  .day-num{ font-size:13px; font-weight:600; color:var(--text-secondary); }
-  .day-num.today{
-    color:#fff; background:var(--accent); width:21px;height:21px;border-radius:50%;
-    display:flex;align-items:center;justify-content:center; font-size:11.5px;
+  .kid-card-header{
+    display:flex; align-items:center; justify-content:space-between;
+    gap:6px; padding:10px 12px;
   }
-  .day-dots{ display:flex; gap:3px; margin-top:4px; flex-wrap:wrap; justify-content:center; max-width:100%; }
-  .day-dot{ width:7px; height:7px; border-radius:50%; }
-
-  /* Day detail panel below calendar */
-  .day-panel{ margin-top:20px; }
-  .day-panel-header{ display:flex; align-items:center; justify-content:space-between; margin-bottom:12px; gap:8px;}
-  .day-panel-title{ font-size:15px; font-weight:700; margin:0; }
-  .add-small-btn{
-    display:flex; align-items:center; gap:5px; padding:8px 12px; font-size:12.5px; font-weight:700;
-    border-radius:10px; border:none; background:var(--accent); color:#fff; flex-shrink:0;
+  .kid-card-name{
+    display:flex; align-items:center; gap:8px;
+    font-size:15px; font-weight:800;
   }
-  .empty-text{ font-size:13.5px; color:var(--text-tertiary); text-align:center; padding:20px 0; }
+  .kid-card-avatar{
+    width:28px;height:28px;border-radius:50%; flex-shrink:0;
+    display:flex; align-items:center; justify-content:center;
+    font-size:12.5px; font-weight:800; color:#fff;
+  }
+  .kid-card-edit{
+    width:26px;height:26px;border-radius:8px;border:none;background:transparent;
+    display:flex;align-items:center;justify-content:center; flex-shrink:0; opacity:0.55;
+  }
 
-  /* ---------- List view ---------- */
-  .list-group{ margin-bottom:20px; }
-  .list-group-date{ font-size:13.5px; font-weight:700; color:var(--text-secondary); margin-bottom:9px; display:block; }
-  .list-group-date.today{ color:var(--accent-text); }
-  .list-empty{ display:flex; flex-direction:column; align-items:center; gap:10px; padding:60px 0; color:var(--text-tertiary); }
-
-  /* ---------- Post-it event card ---------- */
-  .postit-list{ display:flex; flex-direction:column; gap:9px; }
-  .postit{
-    position:relative;
-    display:flex; align-items:center; gap:11px;
-    padding:13px 14px;
+  .kid-postit{
+    margin:0 9px 9px;
     border-radius:13px;
+    padding:11px 11px 12px;
+    min-height:120px;
+    display:flex; flex-direction:column; gap:7px;
     box-shadow:var(--shadow-postit);
   }
-  .postit-stripe{
-    position:absolute; left:0; top:0; bottom:0; width:5px;
-    border-radius:13px 0 0 13px;
+  .kid-postit-empty{
+    flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center;
+    gap:6px; padding:10px 4px; text-align:center;
   }
-  .postit-body{ flex:1; min-width:0; padding-left:4px; }
-  .postit-title{ font-size:14.5px; font-weight:700; margin:0; line-height:1.3; }
-  .postit-meta{ display:flex; gap:11px; margin-top:3px; flex-wrap:wrap; }
-  .postit-meta-item{ display:flex; align-items:center; gap:4px; font-size:11.5px; font-weight:500; opacity:0.75; }
-  .postit-kids{ display:flex; gap:4px; flex-shrink:0; }
-  .postit-kid-dot{
-    width:24px;height:24px;border-radius:50%; display:flex;align-items:center;justify-content:center;
-    font-size:11px; font-weight:700; border:2px solid rgba(255,255,255,0.6);
+  .kid-postit-empty span{ font-size:12px; font-weight:600; opacity:0.65; }
+  .kid-postit-add-hint{
+    display:flex; align-items:center; gap:5px; font-size:11px; font-weight:700; opacity:0.8;
   }
 
-  /* ---------- FAB ---------- */
-  .fab{
-    position:fixed; right:18px; bottom:calc(env(safe-area-inset-bottom) + 18px); z-index:30;
-    width:58px;height:58px;border-radius:50%;
-    background:var(--accent); color:#fff; border:none;
-    display:flex;align-items:center;justify-content:center;
-    box-shadow:0 6px 18px rgba(123,122,201,0.45);
+  .rdv-item{
+    background:rgba(255,255,255,0.6);
+    border-radius:10px;
+    padding:8px 9px;
   }
+  .rdv-item-title{ font-size:13px; font-weight:700; margin:0; line-height:1.25; }
+  .rdv-item-meta{ display:flex; gap:8px; margin-top:3px; flex-wrap:wrap; }
+  .rdv-item-meta span{ display:flex; align-items:center; gap:3px; font-size:10.5px; font-weight:600; opacity:0.75; }
+  .rdv-item-del{
+    margin-top:5px; display:inline-flex; align-items:center; gap:3px;
+    font-size:10px; font-weight:700; opacity:0.55; background:none; border:none; padding:0;
+  }
+
+  .kid-postit-footer{
+    display:flex; align-items:center; justify-content:center; gap:6px;
+    padding:8px 6px 2px; font-size:11.5px; font-weight:700; opacity:0.7;
+    border-top:1px dashed rgba(0,0,0,0.12); margin-top:2px;
+  }
+
+  /* ---------- Bottom row: mini calendar + notes ---------- */
+  .bottom-row{
+    display:grid; grid-template-columns:1fr 1fr; gap:11px;
+  }
+
+  .mini-cal-card{
+    border-radius:16px; border:1.5px solid var(--border); background:var(--surface);
+    padding:11px 10px 12px;
+  }
+  .mini-cal-header{ display:flex; align-items:center; justify-content:space-between; margin-bottom:7px; }
+  .mini-cal-title{ font-size:12.5px; font-weight:800; }
+  .mini-cal-nav{ display:flex; gap:3px; }
+  .mini-nav-btn{
+    width:22px;height:22px;border-radius:6px;border:none;background:var(--surface-2);
+    display:flex;align-items:center;justify-content:center;color:var(--text-secondary);
+  }
+  .mini-weekday-row{ display:grid; grid-template-columns:repeat(7,1fr); margin-bottom:2px; }
+  .mini-weekday-cell{ text-align:center; font-size:8px; font-weight:700; color:var(--text-tertiary); }
+  .mini-cal-grid{ display:grid; grid-template-columns:repeat(7,1fr); gap:1px; }
+  .mini-day-cell{
+    aspect-ratio:1/1; display:flex; flex-direction:column; align-items:center; justify-content:center;
+    border-radius:6px; position:relative;
+  }
+  .mini-day-num{ font-size:9.5px; font-weight:600; color:var(--text-secondary); }
+  .mini-day-num.today{ color:#fff; background:var(--accent); border-radius:50%; width:15px;height:15px; display:flex; align-items:center; justify-content:center; font-size:8.5px; }
+  .mini-day-cell.muted .mini-day-num{ opacity:0.28; }
+  .mini-day-dots{ display:flex; gap:1.5px; position:absolute; bottom:1px; }
+  .mini-day-dot{ width:3.5px;height:3.5px;border-radius:50%; }
+
+  .notes-card{
+    border-radius:16px; border:2.5px solid var(--notes-border);
+    background:var(--notes-bg); color:var(--notes-text);
+    padding:11px 11px 10px;
+    display:flex; flex-direction:column;
+  }
+  .notes-card-header{ display:flex; align-items:center; justify-content:space-between; margin-bottom:7px; }
+  .notes-card-title{ font-size:13px; font-weight:800; display:flex; align-items:center; gap:6px; }
+  .notes-add-btn{
+    width:24px;height:24px;border-radius:7px;border:none;background:rgba(255,255,255,0.6);
+    display:flex;align-items:center;justify-content:center;color:var(--notes-text); flex-shrink:0;
+  }
+  .notes-list{ display:flex; flex-direction:column; gap:6px; max-height:160px; overflow-y:auto; }
+  .note-item{ background:rgba(255,255,255,0.55); border-radius:9px; padding:7px 8px; }
+  .note-item-top{ display:flex; align-items:center; justify-content:space-between; gap:6px; }
+  .note-item-type{ font-size:11px; font-weight:800; }
+  .note-item-del{ background:none; border:none; padding:0; opacity:0.5; display:flex; }
+  .note-item-meta{ font-size:10px; font-weight:600; opacity:0.8; margin-top:2px; }
+  .note-item-comment{ font-size:10.5px; margin-top:3px; opacity:0.85; line-height:1.3; }
+  .notes-empty{ font-size:11.5px; opacity:0.65; text-align:center; padding:14px 4px; flex:1; display:flex; align-items:center; justify-content:center; }
 
   /* ---------- Overlay / Modal ---------- */
   .overlay{
@@ -204,7 +213,7 @@
     display:flex; align-items:center; justify-content:space-between;
     padding:16px 18px; border-bottom:1px solid var(--border); flex-shrink:0;
   }
-  .modal-title{ font-size:16px; font-weight:700; margin:0; }
+  .modal-title{ font-size:16px; font-weight:700; margin:0; display:flex; align-items:center; gap:8px; }
   .close-btn{
     width:30px;height:30px;border-radius:8px;border:none;background:var(--surface-2);
     display:flex;align-items:center;justify-content:center;color:var(--text-secondary);
@@ -228,18 +237,6 @@
   textarea{ height:auto; padding:11px 13px; resize:vertical; min-height:64px; }
   input:focus, textarea:focus{ outline:none; border-color:var(--accent); box-shadow:0 0 0 3px rgba(123,122,201,0.18); }
 
-  .kid-pick-grid{ display:flex; gap:8px; }
-  .kid-pick-btn{
-    flex:1; display:flex; flex-direction:column; align-items:center; gap:5px;
-    padding:14px 8px; font-size:13.5px; font-weight:700;
-    border-radius:13px; border:2px solid var(--border); background:var(--surface); color:var(--text-secondary);
-  }
-  .kid-pick-btn.active{ border-color:transparent; box-shadow:var(--shadow-postit); }
-  .kid-pick-avatar{
-    width:34px;height:34px;border-radius:50%; display:flex;align-items:center;justify-content:center;
-    font-size:14px; font-weight:700;
-  }
-
   .primary-btn{
     display:flex; align-items:center; gap:6px; justify-content:center;
     padding:12px 16px; font-size:14px; font-weight:700; border:none; border-radius:12px;
@@ -259,26 +256,26 @@
     border:none; background:var(--danger); color:#fff;
   }
 
-  /* kids management modal */
+  .opt-grid{ display:flex; flex-wrap:wrap; gap:7px; }
+  .opt-btn{
+    display:flex; align-items:center; gap:6px; padding:8px 12px; font-size:12.5px; font-weight:700;
+    border-radius:10px; border:1.5px solid var(--border); background:var(--surface); color:var(--text-secondary);
+  }
+
   .kid-row{
     display:flex; align-items:center; justify-content:space-between; padding:11px 13px;
     border-radius:12px; border:1.5px solid var(--border); margin-bottom:8px;
   }
   .kid-row-left{ display:flex; align-items:center; gap:10px; font-size:14.5px; font-weight:700; }
-  .add-kid-row{ display:flex; gap:8px; margin-top:6px; }
   .icon-btn-sm{
     width:32px;height:32px;border-radius:9px;border:1.5px solid var(--border); background:transparent;
     display:flex;align-items:center;justify-content:center;color:var(--danger);
   }
   .color-pick-row{ display:flex; gap:8px; flex-wrap:wrap; }
-  .color-pick-dot{
-    width:30px;height:30px;border-radius:50%; border:2px solid transparent; flex-shrink:0;
-  }
+  .color-pick-dot{ width:30px;height:30px;border-radius:50%; border:2px solid transparent; flex-shrink:0; }
   .color-pick-dot.active{ border-color:var(--text); }
-
   .hint-text{ font-size:12.5px; color:var(--text-tertiary); }
 
-  /* svg icon helper */
   svg{ display:block; }
 
   /* ---------- Lock / login screen ---------- */
@@ -293,10 +290,7 @@
   }
   #lock-screen h1{ font-size:19px; font-weight:700; margin:0 0 4px; }
   #lock-screen p{ font-size:13.5px; color:var(--text-secondary); margin:0 0 22px; max-width:280px; }
-  #lock-screen input{
-    width:100%; max-width:260px; text-align:center; letter-spacing:0.15em;
-    font-size:18px; font-weight:600;
-  }
+  #lock-screen input{ width:100%; max-width:260px; text-align:center; letter-spacing:0.15em; font-size:18px; font-weight:600; }
   #lock-screen .primary-btn{ width:100%; max-width:260px; margin-top:14px; justify-content:center; }
   #lock-error{ color:var(--danger); font-size:12.5px; margin-top:10px; min-height:16px; }
   #lock-screen .sync-status{ font-size:11.5px; color:var(--text-tertiary); margin-top:18px; }
@@ -336,26 +330,13 @@
   </div>
 </div>
 
-<div class="viewbar">
-  <div class="seg">
-    <button id="seg-cal" class="active">
-      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-      Calendrier
-    </button>
-    <button id="seg-list">
-      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
-      Liste
-    </button>
+<main>
+  <div class="kids-row" id="kids-row"></div>
+  <div class="bottom-row">
+    <div class="mini-cal-card" id="mini-cal-card"></div>
+    <div class="notes-card" id="notes-card"></div>
   </div>
-</div>
-
-<div class="kid-filters" id="kid-filters"></div>
-
-<main id="main-content"></main>
-
-<button class="fab" id="fab-add" aria-label="Nouveau rendez-vous">
-  <svg width="25" height="25" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-</button>
+</main>
 
 <div id="modal-root"></div>
 
@@ -367,12 +348,21 @@
 
   // ---------- Config ----------
   var KID_COLORS = [
-    { key:"blueviolet", dot:"#9C9BE0", bg:"#EFEEFB", border:"#C2C0EF", text:"#3C3489" },
-    { key:"yellow",     dot:"#E8C24D", bg:"#FBF3DE", border:"#EFD988", text:"#6B4E0A" },
-    { key:"teal",       dot:"#5DCAA5", bg:"#E1F5EE", border:"#9DDFC6", text:"#085041" },
-    { key:"corail",     dot:"#F0997B", bg:"#FAECE7", border:"#F3B69E", text:"#712B13" },
-    { key:"rose",       dot:"#ED93B1", bg:"#FBEAF0", border:"#F2B3C7", text:"#72243E" },
-    { key:"bleu",       dot:"#85B7EB", bg:"#E6F1FB", border:"#AED0F2", text:"#0C447C" }
+    { key:"blueviolet", dot:"var(--nina-dot)",  bg:"var(--nina-bg)",  border:"var(--nina-border)",  text:"var(--nina-text)",  hex:"#9C9BE0" },
+    { key:"yellow",     dot:"var(--ilhan-dot)", bg:"var(--ilhan-bg)", border:"var(--ilhan-border)", text:"var(--ilhan-text)", hex:"#E8C24D" },
+    { key:"teal",       dot:"#5DCAA5", bg:"#E1F5EE", border:"#9DDFC6", text:"#085041", hex:"#5DCAA5" },
+    { key:"corail",     dot:"#F0997B", bg:"#FAECE7", border:"#F3B69E", text:"#712B13", hex:"#F0997B" },
+    { key:"rose",       dot:"#ED93B1", bg:"#FBEAF0", border:"#F2B3C7", text:"#72243E", hex:"#ED93B1" },
+    { key:"bleu",       dot:"#85B7EB", bg:"#E6F1FB", border:"#AED0F2", text:"#0C447C", hex:"#85B7EB" }
+  ];
+
+  var EVENT_TYPES = [
+    { key:"medical", label:"Médical" },
+    { key:"sport", label:"Sport" },
+    { key:"ecole", label:"École" },
+    { key:"sortie", label:"Sortie" },
+    { key:"famille", label:"Famille" },
+    { key:"autre", label:"Autre" }
   ];
 
   var DEFAULT_KIDS = [
@@ -391,16 +381,13 @@
   };
 
   var LOCAL_CODE_KEY = "family-rdv-access-code-v1";
-  var WEEKDAYS = ["Lun","Mar","Mer","Jeu","Ven","Sam","Dim"];
+  var WEEKDAYS = ["L","M","M","J","V","S","D"];
   var MONTHS = ["Janvier","Février","Mars","Avril","Mai","Juin","Juillet","Août","Septembre","Octobre","Novembre","Décembre"];
   var DAYS_LONG = ["Dimanche","Lundi","Mardi","Mercredi","Jeudi","Vendredi","Samedi"];
 
   // ---------- State ----------
-  var state = { events:[], members: DEFAULT_KIDS.slice() };
-  var view = "calendar";
-  var cursor = (function(){ var d=new Date(); return new Date(d.getFullYear(), d.getMonth(), 1); })();
-  var selectedDate = toISO(new Date());
-  var filterKid = "all";
+  var state = { events:[], members: DEFAULT_KIDS.slice(), notes:[] };
+  var miniCalCursor = (function(){ var d=new Date(); return new Date(d.getFullYear(), d.getMonth(), 1); })();
   var db = null;
   var docRef = null;
   var applyingRemoteUpdate = false;
@@ -412,8 +399,10 @@
   function toISO(d){ return d.getFullYear()+"-"+pad(d.getMonth()+1)+"-"+pad(d.getDate()); }
   function fromISO(s){ var p=s.split("-").map(Number); return new Date(p[0],p[1]-1,p[2]); }
   function getKidColor(key){ for(var i=0;i<KID_COLORS.length;i++){ if(KID_COLORS[i].key===key) return KID_COLORS[i]; } return KID_COLORS[0]; }
-  function formatDateLong(iso){ var d=fromISO(iso); return DAYS_LONG[d.getDay()]+" "+d.getDate()+" "+MONTHS[d.getMonth()]+" "+d.getFullYear(); }
+  function getEventType(key){ for(var i=0;i<EVENT_TYPES.length;i++){ if(EVENT_TYPES[i].key===key) return EVENT_TYPES[i]; } return EVENT_TYPES[EVENT_TYPES.length-1]; }
+  function formatDateShort(iso){ var d=fromISO(iso); return d.getDate()+" "+MONTHS[d.getMonth()].slice(0,3); }
   function esc(s){ var div=document.createElement("div"); div.textContent = s==null? "":s; return div.innerHTML; }
+  function todayISO(){ return toISO(new Date()); }
 
   function codeToDocId(code){
     var normalized = code.trim().toLowerCase();
@@ -448,7 +437,7 @@
 
     docRef.get().then(function(snap){
       if(!snap.exists){
-        return docRef.set({ events:[], members: DEFAULT_KIDS.slice(), updatedAt: Date.now() });
+        return docRef.set({ events:[], members: DEFAULT_KIDS.slice(), notes:[], updatedAt: Date.now() });
       }
     }).then(function(){
       localStorage.setItem(LOCAL_CODE_KEY, code);
@@ -467,6 +456,7 @@
       applyingRemoteUpdate = true;
       state.events = Array.isArray(data.events) ? data.events : [];
       state.members = Array.isArray(data.members) && data.members.length ? data.members : DEFAULT_KIDS.slice();
+      state.notes = Array.isArray(data.notes) ? data.notes : [];
       applyingRemoteUpdate = false;
       setSyncStatus("Synchronisé");
       renderAll();
@@ -481,7 +471,7 @@
     setSyncStatus("Synchronisation...", true);
     clearTimeout(saveDebounceTimer);
     saveDebounceTimer = setTimeout(function(){
-      docRef.set({ events: state.events, members: state.members, updatedAt: Date.now() })
+      docRef.set({ events: state.events, members: state.members, notes: state.notes, updatedAt: Date.now() })
         .then(function(){ setSyncStatus("Synchronisé"); })
         .catch(function(){ setSyncStatus("Erreur de sync", true); });
     }, 250);
@@ -496,66 +486,98 @@
     if(el) el.textContent = msg;
   }
 
-  function todayISO(){ return toISO(new Date()); }
-
-  function filteredEvents(){
-    return state.events.filter(function(e){
-      if(filterKid!=="all" && e.memberIds.indexOf(filterKid)===-1) return false;
-      return true;
-    });
+  // ---------- Render: everything ----------
+  function renderAll(){
+    renderKidsRow();
+    renderMiniCalendar();
+    renderNotes();
   }
 
-  function eventsByDate(list){
-    var map = {};
-    list.forEach(function(e){
-      if(!map[e.date]) map[e.date]=[];
-      map[e.date].push(e);
-    });
-    Object.keys(map).forEach(function(k){
-      map[k].sort(function(a,b){ return (a.time||"99:99").localeCompare(b.time||"99:99"); });
-    });
-    return map;
-  }
-
-  // ---------- Render: kid filter chips ----------
-  function renderKidFilters(){
-    var wrap = document.getElementById("kid-filters");
+  // ---------- Kid columns ----------
+  function renderKidsRow(){
+    var wrap = document.getElementById("kids-row");
     wrap.innerHTML = "";
 
-    var allBtn = document.createElement("button");
-    allBtn.className = "kid-chip" + (filterKid==="all" ? " active" : "");
-    if(filterKid==="all"){ allBtn.style.background = "var(--surface-2)"; allBtn.style.color="var(--text)"; }
-    allBtn.textContent = "Tous";
-    allBtn.addEventListener("click", function(){ filterKid="all"; renderAll(); });
-    wrap.appendChild(allBtn);
+    var today = todayISO();
 
     state.members.forEach(function(m){
       var c = getKidColor(m.color);
-      var btn = document.createElement("button");
-      var active = filterKid===m.id;
-      btn.className = "kid-chip" + (active ? " active" : "");
-      if(active){ btn.style.background = c.bg; btn.style.color = c.text; }
-      var dot = document.createElement("span");
-      dot.className = "kid-chip-dot";
-      dot.style.background = c.dot;
-      btn.appendChild(dot);
-      btn.appendChild(document.createTextNode(m.name));
-      btn.addEventListener("click", function(){ filterKid=m.id; renderAll(); });
-      wrap.appendChild(btn);
+      var upcoming = state.events
+        .filter(function(e){ return e.memberIds.indexOf(m.id)!==-1 && e.date >= today; })
+        .sort(function(a,b){
+          var da = a.date+" "+(a.time||"99:99");
+          var db = b.date+" "+(b.time||"99:99");
+          return da.localeCompare(db);
+        });
+
+      var card = document.createElement("div");
+      card.className = "kid-card";
+      card.style.borderColor = c.dot;
+
+      var headerHTML = '<div class="kid-card-header" style="background:'+c.bg+';color:'+c.text+'">';
+      headerHTML += '<div class="kid-card-name"><span class="kid-card-avatar" style="background:'+c.dot+'">'+esc(m.name.charAt(0).toUpperCase())+'</span>'+esc(m.name)+'</div>';
+      headerHTML += '<button class="kid-card-edit" data-edit-kid="'+m.id+'" style="color:'+c.text+'" aria-label="Modifier"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.12 2.12 0 0 1 3 3L12 15l-4 1 1-4Z"/></svg></button>';
+      headerHTML += '</div>';
+
+      var postitHTML = '<div class="kid-postit" data-add-for="'+m.id+'" style="background:'+c.bg+';color:'+c.text+'">';
+      if(upcoming.length===0){
+        postitHTML += '<div class="kid-postit-empty">';
+        postitHTML += '<span>Aucun RDV à venir</span>';
+        postitHTML += '<span class="kid-postit-add-hint"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Toucher pour ajouter</span>';
+        postitHTML += '</div>';
+      } else {
+        upcoming.forEach(function(ev){
+          postitHTML += '<div class="rdv-item" data-edit-event="'+ev.id+'">';
+          postitHTML += '<p class="rdv-item-title">'+esc(ev.title)+'</p>';
+          postitHTML += '<div class="rdv-item-meta">';
+          postitHTML += '<span><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>'+esc(formatDateShort(ev.date))+'</span>';
+          if(ev.time){ postitHTML += '<span><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>'+esc(ev.time)+'</span>'; }
+          if(ev.location){ postitHTML += '<span><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>'+esc(ev.location)+'</span>'; }
+          postitHTML += '</div></div>';
+        });
+        postitHTML += '<div class="kid-postit-footer" data-add-for-footer="'+m.id+'"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Ajouter un RDV</div>';
+      }
+      postitHTML += '</div>';
+
+      card.innerHTML = headerHTML + postitHTML;
+      wrap.appendChild(card);
+    });
+
+    // Listeners
+    wrap.querySelectorAll("[data-edit-kid]").forEach(function(btn){
+      btn.addEventListener("click", function(e){
+        e.stopPropagation();
+        openMembersModal();
+      });
+    });
+    wrap.querySelectorAll("[data-edit-event]").forEach(function(el){
+      el.addEventListener("click", function(e){
+        e.stopPropagation();
+        var id = el.getAttribute("data-edit-event");
+        var ev = state.events.find(function(x){ return x.id===id; });
+        if(ev) openEventModal(ev, null, null);
+      });
+    });
+    wrap.querySelectorAll("[data-add-for]").forEach(function(el){
+      el.addEventListener("click", function(e){
+        if(e.target.closest("[data-edit-event]")) return;
+        var kidId = el.getAttribute("data-add-for");
+        openEventModal(null, kidId, null);
+      });
+    });
+    wrap.querySelectorAll("[data-add-for-footer]").forEach(function(el){
+      el.addEventListener("click", function(e){
+        e.stopPropagation();
+        var kidId = el.getAttribute("data-add-for-footer");
+        openEventModal(null, kidId, null);
+      });
     });
   }
 
-  // ---------- Render: main content ----------
-  function renderAll(){
-    renderKidFilters();
-    document.getElementById("seg-cal").classList.toggle("active", view==="calendar");
-    document.getElementById("seg-list").classList.toggle("active", view==="list");
-    if(view==="calendar") renderCalendar(); else renderList();
-  }
-
-  function renderCalendar(){
-    var main = document.getElementById("main-content");
-    var year = cursor.getFullYear(), month = cursor.getMonth();
+  // ---------- Mini calendar ----------
+  function renderMiniCalendar(){
+    var card = document.getElementById("mini-cal-card");
+    var year = miniCalCursor.getFullYear(), month = miniCalCursor.getMonth();
     var firstOfMonth = new Date(year, month, 1);
     var startOffset = (firstOfMonth.getDay()+6)%7;
     var daysInMonth = new Date(year, month+1, 0).getDate();
@@ -574,40 +596,39 @@
       if(cells.length>=42) break;
     }
 
-    var byDate = eventsByDate(filteredEvents());
+    var byDate = {};
+    state.events.forEach(function(e){
+      if(!byDate[e.date]) byDate[e.date] = [];
+      byDate[e.date].push(e);
+    });
+
     var today = todayISO();
 
-    var html = "";
-    html += '<div class="month-nav">';
-    html += '<button class="nav-btn" id="prev-month" aria-label="Mois précédent"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg></button>';
-    html += '<span class="month-label">'+MONTHS[month]+' '+year+'</span>';
-    html += '<button class="nav-btn" id="next-month" aria-label="Mois suivant"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg></button>';
-    html += '<button class="today-btn" id="goto-today">Aujourd\'hui</button>';
+    var html = '<div class="mini-cal-header"><span class="mini-cal-title">'+MONTHS[month]+' '+year+'</span>';
+    html += '<div class="mini-cal-nav"><button class="mini-nav-btn" id="mini-prev"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg></button>';
+    html += '<button class="mini-nav-btn" id="mini-next"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg></button></div></div>';
+
+    html += '<div class="mini-weekday-row">';
+    WEEKDAYS.forEach(function(w){ html += '<div class="mini-weekday-cell">'+w+'</div>'; });
     html += '</div>';
 
-    html += '<div class="weekday-row">';
-    WEEKDAYS.forEach(function(w){ html += '<div class="weekday-cell">'+w+'</div>'; });
-    html += '</div>';
-
-    html += '<div class="cal-grid">';
-    cells.forEach(function(cell, idx){
+    html += '<div class="mini-cal-grid">';
+    cells.forEach(function(cell){
       var iso = toISO(cell.date);
       var dayEvents = byDate[iso] || [];
       var isToday = iso===today;
-      var isSelected = iso===selectedDate;
-      var cls = "day-cell" + (cell.inMonth ? "" : " muted") + (isSelected ? " selected" : "");
-      html += '<div class="'+cls+'" data-date="'+iso+'">';
-      html += '<span class="day-num'+(isToday?" today":"")+'">'+cell.date.getDate()+'</span>';
-      if(dayEvents.length>0){
-        html += '<div class="day-dots">';
-        var seenKids = {};
+      html += '<div class="mini-day-cell'+(cell.inMonth?"":" muted")+'">';
+      html += '<span class="mini-day-num'+(isToday?" today":"")+'">'+cell.date.getDate()+'</span>';
+      if(dayEvents.length>0 && cell.inMonth){
+        html += '<div class="mini-day-dots">';
+        var seen = {};
         dayEvents.forEach(function(ev){
           (ev.memberIds.length ? ev.memberIds : ["_none"]).forEach(function(mid){
-            if(seenKids[mid]) return;
-            seenKids[mid] = true;
+            if(seen[mid]) return;
+            seen[mid] = true;
             var member = state.members.find(function(m){ return m.id===mid; });
-            var color = member ? getKidColor(member.color).dot : "#C7C4B8";
-            html += '<span class="day-dot" style="background:'+color+'"></span>';
+            var color = member ? getKidColor(member.color).hex : "#C7C4B8";
+            html += '<span class="mini-day-dot" style="background:'+color+'"></span>';
           });
         });
         html += '</div>';
@@ -616,118 +637,73 @@
     });
     html += '</div>';
 
-    var selDayEvents = byDate[selectedDate] || [];
-    html += '<div class="day-panel">';
-    html += '<div class="day-panel-header"><h2 class="day-panel-title">'+esc(formatDateLong(selectedDate))+'</h2>';
-    html += '<button class="add-small-btn" id="add-for-selected"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Ajouter</button></div>';
-    if(selDayEvents.length===0){
-      html += '<p class="empty-text">Aucun rendez-vous ce jour-là.</p>';
-    } else {
-      html += '<div class="postit-list">';
-      selDayEvents.forEach(function(ev){ html += postitHTML(ev); });
-      html += '</div>';
-    }
-    html += '</div>';
+    card.innerHTML = html;
 
-    main.innerHTML = html;
-
-    document.getElementById("prev-month").addEventListener("click", function(){ cursor = new Date(year, month-1, 1); renderCalendar(); });
-    document.getElementById("next-month").addEventListener("click", function(){ cursor = new Date(year, month+1, 1); renderCalendar(); });
-    document.getElementById("goto-today").addEventListener("click", function(){
-      var t = new Date();
-      cursor = new Date(t.getFullYear(), t.getMonth(), 1);
-      selectedDate = toISO(t);
-      renderCalendar();
-    });
-    document.getElementById("add-for-selected").addEventListener("click", function(){ openEventModal(null, selectedDate); });
-
-    main.querySelectorAll(".day-cell").forEach(function(el){
-      el.addEventListener("click", function(){
-        selectedDate = el.getAttribute("data-date");
-        renderCalendar();
-      });
-    });
-    main.querySelectorAll(".postit").forEach(function(el){
-      el.addEventListener("click", function(){
-        var id = el.getAttribute("data-id");
-        var ev = state.events.find(function(e){ return e.id===id; });
-        if(ev) openEventModal(ev, null);
-      });
-    });
+    document.getElementById("mini-prev").addEventListener("click", function(){ miniCalCursor = new Date(year, month-1, 1); renderMiniCalendar(); });
+    document.getElementById("mini-next").addEventListener("click", function(){ miniCalCursor = new Date(year, month+1, 1); renderMiniCalendar(); });
   }
 
-  function renderList(){
-    var main = document.getElementById("main-content");
-    var list = filteredEvents().slice().sort(function(a,b){
-      var da = a.date+" "+(a.time||"99:99");
-      var db = b.date+" "+(b.time||"99:99");
+  // ---------- Notes post-it ----------
+  function renderNotes(){
+    var card = document.getElementById("notes-card");
+    var sorted = state.notes.slice().sort(function(a,b){
+      var da = (a.date||"")+" "+(a.time||"99:99");
+      var db = (b.date||"")+" "+(b.time||"99:99");
       return da.localeCompare(db);
     });
 
-    if(list.length===0){
-      main.innerHTML = '<div class="list-empty"><svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg><p class="empty-text">Aucun rendez-vous à afficher.</p></div>';
-      return;
-    }
+    var html = '<div class="notes-card-header"><span class="notes-card-title"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3v4a1 1 0 0 0 1 1h4"/><path d="M17 21H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h7l5 5v11a2 2 0 0 1-2 2Z"/></svg>Notes</span>';
+    html += '<button class="notes-add-btn" id="notes-add-btn" aria-label="Ajouter une note"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></button></div>';
 
-    var map = {};
-    list.forEach(function(e){ if(!map[e.date]) map[e.date]=[]; map[e.date].push(e); });
-    var dates = Object.keys(map).sort();
-    var today = todayISO();
-
-    var html = "";
-    dates.forEach(function(date){
-      html += '<div class="list-group">';
-      html += '<span class="list-group-date'+(date===today?" today":"")+'">'+esc(formatDateLong(date))+'</span>';
-      html += '<div class="postit-list">';
-      map[date].sort(function(a,b){ return (a.time||"99:99").localeCompare(b.time||"99:99"); }).forEach(function(ev){
-        html += postitHTML(ev);
-      });
-      html += '</div></div>';
-    });
-    main.innerHTML = html;
-
-    main.querySelectorAll(".postit").forEach(function(el){
-      el.addEventListener("click", function(){
-        var id = el.getAttribute("data-id");
-        var ev = state.events.find(function(e){ return e.id===id; });
-        if(ev) openEventModal(ev, null);
-      });
-    });
-  }
-
-  function postitHTML(ev){
-    var members = state.members.filter(function(m){ return ev.memberIds.indexOf(m.id)!==-1; });
-    var primaryColor = members.length ? getKidColor(members[0].color) : { bg:"#F1EFE8", text:"#444441", dot:"#C7C4B8" };
-
-    var html = '<div class="postit" data-id="'+ev.id+'" style="background:'+primaryColor.bg+';color:'+primaryColor.text+'">';
-    html += '<div class="postit-stripe" style="background:'+primaryColor.dot+'"></div>';
-    html += '<div class="postit-body"><p class="postit-title">'+esc(ev.title)+'</p><div class="postit-meta">';
-    if(ev.time){
-      html += '<span class="postit-meta-item"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>'+esc(ev.time)+'</span>';
-    }
-    if(ev.location){
-      html += '<span class="postit-meta-item"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>'+esc(ev.location)+'</span>';
-    }
-    html += '</div></div>';
-    if(members.length>0){
-      html += '<div class="postit-kids">';
-      members.forEach(function(m){
-        var c = getKidColor(m.color);
-        html += '<div class="postit-kid-dot" style="background:'+c.dot+';color:'+c.text+'" title="'+esc(m.name)+'">'+esc(m.name.charAt(0).toUpperCase())+'</div>';
+    if(sorted.length===0){
+      html += '<div class="notes-empty">Rien de noté pour l\'instant.</div>';
+    } else {
+      html += '<div class="notes-list">';
+      sorted.forEach(function(n){
+        var t = getEventType(n.type);
+        html += '<div class="note-item" data-edit-note="'+n.id+'">';
+        html += '<div class="note-item-top"><span class="note-item-type">'+esc(t.label)+'</span>';
+        html += '<button class="note-item-del" data-del-note="'+n.id+'" aria-label="Supprimer"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button></div>';
+        var metaParts = [];
+        if(n.date) metaParts.push(formatDateShort(n.date));
+        if(n.time) metaParts.push(n.time);
+        if(n.location) metaParts.push(n.location);
+        if(metaParts.length) html += '<div class="note-item-meta">'+esc(metaParts.join(" · "))+'</div>';
+        if(n.comment) html += '<div class="note-item-comment">'+esc(n.comment)+'</div>';
+        html += '</div>';
       });
       html += '</div>';
     }
-    html += '</div>';
-    return html;
+
+    card.innerHTML = html;
+
+    document.getElementById("notes-add-btn").addEventListener("click", function(){ openNoteModal(null); });
+    card.querySelectorAll("[data-edit-note]").forEach(function(el){
+      el.addEventListener("click", function(e){
+        if(e.target.closest("[data-del-note]")) return;
+        var id = el.getAttribute("data-edit-note");
+        var n = state.notes.find(function(x){ return x.id===id; });
+        if(n) openNoteModal(n);
+      });
+    });
+    card.querySelectorAll("[data-del-note]").forEach(function(btn){
+      btn.addEventListener("click", function(e){
+        e.stopPropagation();
+        var id = btn.getAttribute("data-del-note");
+        state.notes = state.notes.filter(function(n){ return n.id!==id; });
+        saveState();
+        renderNotes();
+      });
+    });
   }
 
-  // ---------- Event modal ----------
+  // ---------- Event modal (RDV pour un enfant) ----------
   var currentForm = null;
 
-  function openEventModal(ev, dateForNew){
+  function openEventModal(ev, presetKidId, dateForNew){
     currentForm = ev ? Object.assign({}, ev, { memberIds: ev.memberIds.slice() }) : {
-      id:null, title:"", date: dateForNew || selectedDate || todayISO(),
-      time:"", location:"", memberIds:[], notes:""
+      id:null, title:"", date: dateForNew || todayISO(),
+      time:"", location:"", memberIds: presetKidId ? [presetKidId] : [], notes:""
     };
     renderEventModal();
   }
@@ -743,19 +719,14 @@
 
     html += '<div class="modal-body">';
 
-    html += '<div class="field"><label class="field-label">Pour qui ?</label><div class="kid-pick-grid" id="f-kids">';
+    html += '<div class="field"><label class="field-label">Pour qui ?</label><div class="opt-grid" id="f-kids">';
     state.members.forEach(function(m){
       var c = getKidColor(m.color);
       var active = f.memberIds.indexOf(m.id)!==-1;
       var style = active ? ('background:'+c.bg+';border-color:'+c.dot+';color:'+c.text) : '';
-      html += '<button type="button" class="kid-pick-btn'+(active?" active":"")+'" data-member="'+m.id+'" style="'+style+'">';
-      html += '<span class="kid-pick-avatar" style="background:'+c.dot+';color:'+c.text+'">'+esc(m.name.charAt(0).toUpperCase())+'</span>';
-      html += esc(m.name)+'</button>';
+      html += '<button type="button" class="opt-btn'+(active?" active":"")+'" data-member="'+m.id+'" style="'+style+'">'+esc(m.name)+'</button>';
     });
     html += '</div></div>';
-    if(state.members.length===0){
-      html += '<p class="hint-text">Ajoute Nina, Ilhan ou un autre enfant via l\'icône en haut.</p>';
-    }
 
     html += '<div class="field"><label class="field-label">Titre</label><input type="text" id="f-title" placeholder="Ex. Rendez-vous dentiste" value="'+esc(f.title)+'"></div>';
 
@@ -791,7 +762,7 @@
     document.getElementById("f-location").addEventListener("input", function(e){ currentForm.location = e.target.value; });
     document.getElementById("f-notes").addEventListener("input", function(e){ currentForm.notes = e.target.value; });
 
-    root.querySelectorAll("#f-kids .kid-pick-btn").forEach(function(btn){
+    root.querySelectorAll("#f-kids .opt-btn").forEach(function(btn){
       btn.addEventListener("click", function(){
         var id = btn.getAttribute("data-member");
         var idx = currentForm.memberIds.indexOf(id);
@@ -837,6 +808,99 @@
     currentForm = null;
   }
 
+  // ---------- Note modal (post-it Notes) ----------
+  var currentNote = null;
+
+  function openNoteModal(note){
+    currentNote = note ? Object.assign({}, note) : {
+      id:null, type:"famille", date:"", time:"", location:"", comment:""
+    };
+    renderNoteModal();
+  }
+
+  function renderNoteModal(){
+    var root = document.getElementById("modal-root");
+    var n = currentNote;
+    var isEdit = !!n.id;
+
+    var html = '<div class="overlay" id="note-overlay"><div class="modal">';
+    html += '<div class="modal-header"><h2 class="modal-title">'+(isEdit?"Modifier la note":"Nouvelle note")+'</h2>';
+    html += '<button class="close-btn" id="note-close" aria-label="Fermer"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button></div>';
+
+    html += '<div class="modal-body">';
+
+    html += '<div class="field"><label class="field-label">Type d\'événement</label><div class="opt-grid" id="n-types">';
+    EVENT_TYPES.forEach(function(t){
+      var active = n.type===t.key;
+      html += '<button type="button" class="opt-btn'+(active?" active":"")+'" data-type="'+t.key+'" style="'+(active?'background:var(--notes-bg);border-color:var(--notes-border);color:var(--notes-text)':'')+'">'+esc(t.label)+'</button>';
+    });
+    html += '</div></div>';
+
+    html += '<div class="field-row">';
+    html += '<div class="field"><label class="field-label">Date (optionnel)</label><input type="date" id="n-date" value="'+esc(n.date)+'"></div>';
+    html += '<div class="field"><label class="field-label">Heure (optionnel)</label><input type="time" id="n-time" value="'+esc(n.time)+'"></div>';
+    html += '</div>';
+
+    html += '<div class="field"><label class="field-label">Lieu (optionnel)</label><input type="text" id="n-location" placeholder="Ex. Mairie" value="'+esc(n.location)+'"></div>';
+
+    html += '<div class="field"><label class="field-label">Commentaire</label><textarea id="n-comment" placeholder="Détails...">'+esc(n.comment)+'</textarea></div>';
+    html += '</div>';
+
+    html += '<div class="modal-footer">';
+    if(isEdit){
+      html += '<button class="danger-btn" id="note-delete"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>Supprimer</button>';
+    } else {
+      html += '<span></span>';
+    }
+    html += '<div class="footer-actions"><button class="secondary-btn" id="note-cancel">Annuler</button>';
+    html += '<button class="primary-btn" id="note-save">'+(isEdit?"Enregistrer":"Ajouter")+'</button></div>';
+    html += '</div></div></div>';
+
+    root.innerHTML = html;
+
+    document.getElementById("note-close").addEventListener("click", closeNoteModal);
+    document.getElementById("note-cancel").addEventListener("click", closeNoteModal);
+    document.getElementById("note-overlay").addEventListener("click", function(e){ if(e.target.id==="note-overlay") closeNoteModal(); });
+
+    document.getElementById("n-date").addEventListener("input", function(e){ currentNote.date = e.target.value; });
+    document.getElementById("n-time").addEventListener("input", function(e){ currentNote.time = e.target.value; });
+    document.getElementById("n-location").addEventListener("input", function(e){ currentNote.location = e.target.value; });
+    document.getElementById("n-comment").addEventListener("input", function(e){ currentNote.comment = e.target.value; });
+
+    root.querySelectorAll("#n-types .opt-btn").forEach(function(btn){
+      btn.addEventListener("click", function(){
+        currentNote.type = btn.getAttribute("data-type");
+        renderNoteModal();
+      });
+    });
+
+    if(isEdit){
+      document.getElementById("note-delete").addEventListener("click", function(){
+        openConfirmDialog("Supprimer cette note ?", function(){
+          state.notes = state.notes.filter(function(n){ return n.id!==currentNote.id; });
+          saveState();
+          closeNoteModal();
+          renderNotes();
+        });
+      });
+    }
+    document.getElementById("note-save").addEventListener("click", function(){
+      if(currentNote.id){
+        state.notes = state.notes.map(function(n){ return n.id===currentNote.id ? Object.assign({}, currentNote) : n; });
+      } else {
+        state.notes.push(Object.assign({}, currentNote, { id: uid() }));
+      }
+      saveState();
+      closeNoteModal();
+      renderNotes();
+    });
+  }
+
+  function closeNoteModal(){
+    document.getElementById("modal-root").innerHTML = "";
+    currentNote = null;
+  }
+
   // ---------- Confirm dialog ----------
   function openConfirmDialog(message, onConfirm){
     var root = document.getElementById("modal-root");
@@ -873,16 +937,16 @@
     } else {
       state.members.forEach(function(m){
         var c = getKidColor(m.color);
-        html += '<div class="kid-row"><div class="kid-row-left"><span class="kid-pick-avatar" style="width:26px;height:26px;font-size:11px;background:'+c.dot+';color:'+c.text+'">'+esc(m.name.charAt(0).toUpperCase())+'</span><span>'+esc(m.name)+'</span></div>';
+        html += '<div class="kid-row"><div class="kid-row-left"><span class="kid-card-avatar" style="width:26px;height:26px;font-size:11px;background:'+c.dot+';color:'+c.text+'">'+esc(m.name.charAt(0).toUpperCase())+'</span><span>'+esc(m.name)+'</span></div>';
         html += '<button class="icon-btn-sm" data-remove="'+m.id+'" aria-label="Supprimer '+esc(m.name)+'"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg></button></div>';
       });
     }
 
     html += '<div class="field" style="margin-top:8px;"><label class="field-label">Ajouter un enfant</label>';
-    html += '<div class="add-kid-row"><input type="text" id="new-kid-name" placeholder="Prénom" style="flex:1;"></div>';
+    html += '<div style="display:flex;gap:8px;"><input type="text" id="new-kid-name" placeholder="Prénom" style="flex:1;"></div>';
     html += '<div class="color-pick-row" id="new-kid-colors" style="margin-top:9px;">';
     KID_COLORS.forEach(function(c, idx){
-      html += '<button type="button" class="color-pick-dot'+(idx===0?" active":"")+'" data-color="'+c.key+'" style="background:'+c.dot+'"></button>';
+      html += '<button type="button" class="color-pick-dot'+(idx===0?" active":"")+'" data-color="'+c.key+'" style="background:'+c.hex+'"></button>';
     });
     html += '</div>';
     html += '<button class="primary-btn" id="add-kid-btn" style="margin-top:11px;width:100%;"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Ajouter</button>';
@@ -908,7 +972,6 @@
           state.events = state.events.map(function(e){
             return Object.assign({}, e, { memberIds: e.memberIds.filter(function(mid){ return mid!==id; }) });
           });
-          if(filterKid===id) filterKid="all";
           saveState();
           renderMembersModal();
           renderAll();
@@ -944,10 +1007,7 @@
   }
 
   // ---------- Top-level listeners ----------
-  document.getElementById("seg-cal").addEventListener("click", function(){ view="calendar"; renderAll(); });
-  document.getElementById("seg-list").addEventListener("click", function(){ view="list"; renderAll(); });
   document.getElementById("btn-members").addEventListener("click", openMembersModal);
-  document.getElementById("fab-add").addEventListener("click", function(){ openEventModal(null, selectedDate); });
 
   // ---------- Lock screen listeners ----------
   function attemptLogin(){
