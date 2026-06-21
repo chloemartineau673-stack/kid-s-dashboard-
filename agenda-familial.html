@@ -1,0 +1,858 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, user-scalable=no">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#0F6E56">
+<title>Agenda familial</title>
+<style>
+  :root{
+    --bg:#FAF9F5;
+    --surface:#FFFFFF;
+    --surface-2:#F2F0E8;
+    --border:#E5E2D8;
+    --border-strong:#D6D2C4;
+    --text:#21201B;
+    --text-secondary:#65635A;
+    --text-tertiary:#928F82;
+    --accent:#0F6E56;
+    --accent-light:#E1F5EE;
+    --accent-text:#085041;
+    --danger:#A32D2D;
+    --danger-bg:#FCEBEB;
+    --danger-border:#F09595;
+    --radius-sm:6px;
+    --radius-md:10px;
+    --radius-lg:16px;
+    --shadow-modal:0 12px 32px rgba(30,28,20,0.18);
+  }
+  *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
+  html,body{margin:0;padding:0;}
+  body{
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    background:var(--bg);
+    color:var(--text);
+    min-height:100vh;
+    padding-bottom:env(safe-area-inset-bottom);
+  }
+  button, input, textarea, select{ font-family:inherit; }
+  button{cursor:pointer; -webkit-appearance:none; appearance:none;}
+  button:active{ transform:scale(0.97); }
+
+  /* ---------- Top bar ---------- */
+  .topbar{
+    position:sticky; top:0; z-index:20;
+    background:var(--accent);
+    color:#fff;
+    padding:calc(env(safe-area-inset-top) + 14px) 16px 14px;
+    display:flex; align-items:center; justify-content:space-between;
+  }
+  .topbar-title{display:flex; align-items:center; gap:10px;}
+  .topbar-title h1{font-size:17px; font-weight:600; margin:0;}
+  .topbar-title .sub{font-size:11.5px; opacity:0.85; margin:1px 0 0;}
+  .logo-dot{
+    width:30px;height:30px;border-radius:9px;
+    background:rgba(255,255,255,0.18);
+    display:flex;align-items:center;justify-content:center;
+    flex-shrink:0;
+  }
+  .topbar-actions{display:flex; gap:8px;}
+  .icon-btn{
+    width:34px;height:34px;border-radius:10px;
+    border:none; background:rgba(255,255,255,0.16); color:#fff;
+    display:flex; align-items:center; justify-content:center;
+  }
+  .icon-btn:hover{ background:rgba(255,255,255,0.26); }
+
+  /* ---------- View toggle ---------- */
+  .viewbar{
+    display:flex; gap:8px; padding:12px 16px 0;
+  }
+  .viewbar .seg{
+    flex:1; display:flex; background:var(--surface-2); border-radius:10px; padding:3px; gap:2px;
+  }
+  .seg button{
+    flex:1; border:none; background:transparent; padding:8px 6px; font-size:13px; font-weight:600;
+    color:var(--text-secondary); border-radius:8px;
+    display:flex; align-items:center; justify-content:center; gap:6px;
+  }
+  .seg button.active{ background:var(--surface); color:var(--text); box-shadow:0 1px 3px rgba(0,0,0,0.08); }
+
+  /* ---------- Filters ---------- */
+  .filters{ padding:14px 16px 4px; display:flex; flex-direction:column; gap:10px; }
+  .filter-row{ display:flex; flex-direction:column; gap:6px; }
+  .filter-label{
+    font-size:10.5px; font-weight:700; text-transform:uppercase; letter-spacing:0.04em;
+    color:var(--text-tertiary);
+  }
+  .chip-scroll{
+    display:flex; gap:6px; overflow-x:auto; padding-bottom:2px;
+    scrollbar-width:none;
+  }
+  .chip-scroll::-webkit-scrollbar{ display:none; }
+  .chip{
+    flex-shrink:0;
+    display:flex; align-items:center; gap:6px;
+    padding:6px 12px; font-size:12.5px; font-weight:600;
+    border-radius:999px; border:1px solid var(--border);
+    background:var(--surface); color:var(--text-secondary);
+    white-space:nowrap;
+  }
+  .chip.active{ background:var(--surface-2); border-color:var(--border-strong); color:var(--text); }
+  .chip-dot{ width:8px;height:8px;border-radius:50%; flex-shrink:0; }
+
+  /* ---------- Main ---------- */
+  main{ padding:14px 16px 100px; }
+
+  /* ---------- Calendar ---------- */
+  .month-nav{ display:flex; align-items:center; gap:8px; margin-bottom:10px; }
+  .nav-btn{
+    width:32px;height:32px;border-radius:9px;border:1px solid var(--border);
+    background:var(--surface); display:flex;align-items:center;justify-content:center; color:var(--text-secondary);
+  }
+  .month-label{ font-size:15.5px; font-weight:700; flex:1; text-align:center; }
+  .today-btn{
+    padding:7px 11px; font-size:12px; font-weight:600; border-radius:9px;
+    border:1px solid var(--border); background:var(--surface); color:var(--text-secondary);
+  }
+
+  .weekday-row{ display:grid; grid-template-columns:repeat(7,1fr); margin-bottom:4px; }
+  .weekday-cell{
+    text-align:center; font-size:10.5px; font-weight:700; color:var(--text-tertiary);
+    text-transform:uppercase; padding:4px 0;
+  }
+  .cal-grid{ display:grid; grid-template-columns:repeat(7,1fr); gap:3px; }
+  .day-cell{
+    position:relative;
+    aspect-ratio:1/1;
+    border-radius:9px;
+    border:1px solid transparent;
+    background:var(--surface);
+    display:flex; flex-direction:column; align-items:center; justify-content:flex-start;
+    padding:4px 2px 0;
+  }
+  .day-cell.muted{ background:transparent; opacity:0.35; }
+  .day-cell.selected{ border-color:var(--accent); box-shadow:0 0 0 1px var(--accent); }
+  .day-num{ font-size:12.5px; font-weight:600; color:var(--text-secondary); }
+  .day-num.today{
+    color:#fff; background:var(--accent); width:20px;height:20px;border-radius:50%;
+    display:flex;align-items:center;justify-content:center; font-size:11px;
+  }
+  .day-dots{ display:flex; gap:2px; margin-top:3px; flex-wrap:wrap; justify-content:center; max-width:100%; }
+  .day-dot{ width:5px; height:5px; border-radius:50%; }
+
+  /* Day detail panel below calendar */
+  .day-panel{
+    margin-top:18px; background:var(--surface); border:1px solid var(--border);
+    border-radius:var(--radius-lg); padding:14px;
+  }
+  .day-panel-header{ display:flex; align-items:center; justify-content:space-between; margin-bottom:10px; gap:8px;}
+  .day-panel-title{ font-size:14px; font-weight:700; margin:0; }
+  .add-small-btn{
+    display:flex; align-items:center; gap:5px; padding:7px 11px; font-size:12.5px; font-weight:600;
+    border-radius:9px; border:1px solid var(--border-strong); background:var(--surface); color:var(--text); flex-shrink:0;
+  }
+  .empty-text{ font-size:13px; color:var(--text-tertiary); margin:0; }
+
+  /* ---------- List view ---------- */
+  .list-group{ margin-bottom:18px; }
+  .list-group-date{ font-size:13px; font-weight:700; color:var(--text-secondary); margin-bottom:8px; display:block; }
+  .list-group-date.today{ color:var(--accent); }
+  .list-empty{ display:flex; flex-direction:column; align-items:center; gap:10px; padding:60px 0; color:var(--text-tertiary); }
+
+  /* ---------- Event card ---------- */
+  .ev-list{ display:flex; flex-direction:column; gap:8px; }
+  .ev-card{
+    display:flex; align-items:center; gap:10px; padding:11px 12px;
+    border-radius:var(--radius-md); border:1px solid var(--border); background:var(--surface);
+  }
+  .ev-icon{
+    width:34px;height:34px;border-radius:9px; flex-shrink:0;
+    display:flex; align-items:center; justify-content:center; font-size:16px;
+  }
+  .ev-body{ flex:1; min-width:0; }
+  .ev-title{ font-size:13.5px; font-weight:700; margin:0; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .ev-meta{ display:flex; gap:10px; margin-top:2px; flex-wrap:wrap; }
+  .ev-meta-item{ display:flex; align-items:center; gap:3px; font-size:11px; color:var(--text-tertiary); }
+  .ev-avatars{ display:flex; gap:4px; flex-shrink:0; }
+  .avatar{
+    width:22px;height:22px;border-radius:50%; display:flex;align-items:center;justify-content:center;
+    font-size:10px; font-weight:700; border:1.5px solid;
+  }
+
+  /* ---------- FAB ---------- */
+  .fab{
+    position:fixed; right:18px; bottom:calc(env(safe-area-inset-bottom) + 18px); z-index:30;
+    width:56px;height:56px;border-radius:50%;
+    background:var(--accent); color:#fff; border:none;
+    display:flex;align-items:center;justify-content:center;
+    box-shadow:0 6px 18px rgba(15,110,86,0.4);
+  }
+
+  /* ---------- Overlay / Modal ---------- */
+  .overlay{
+    position:fixed; inset:0; background:rgba(20,18,12,0.5); z-index:100;
+    display:flex; align-items:flex-end; justify-content:center;
+  }
+  .overlay.center{ align-items:center; padding:16px; }
+  .modal{
+    width:100%; max-width:480px; max-height:88vh;
+    background:var(--surface);
+    border-radius:20px 20px 0 0;
+    box-shadow:var(--shadow-modal);
+    display:flex; flex-direction:column; overflow:hidden;
+  }
+  .overlay.center .modal{ border-radius:18px; max-height:90vh; }
+  .modal-header{
+    display:flex; align-items:center; justify-content:space-between;
+    padding:16px 18px; border-bottom:1px solid var(--border); flex-shrink:0;
+  }
+  .modal-title{ font-size:16px; font-weight:700; margin:0; }
+  .close-btn{
+    width:30px;height:30px;border-radius:8px;border:none;background:var(--surface-2);
+    display:flex;align-items:center;justify-content:center;color:var(--text-secondary);
+  }
+  .modal-body{ padding:18px; overflow-y:auto; display:flex; flex-direction:column; gap:16px; }
+  .modal-footer{
+    display:flex; align-items:center; justify-content:space-between; gap:10px;
+    padding:14px 18px; border-top:1px solid var(--border); flex-shrink:0;
+    padding-bottom:calc(env(safe-area-inset-bottom) + 14px);
+  }
+  .footer-actions{ display:flex; gap:8px; flex:1; justify-content:flex-end; }
+
+  /* ---------- Form ---------- */
+  .field{ display:flex; flex-direction:column; gap:6px; }
+  .field-label{ font-size:12.5px; font-weight:700; color:var(--text-secondary); }
+  .field-row{ display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+  input[type=text], input[type=date], input[type=time], textarea{
+    height:42px; padding:0 12px; font-size:14.5px; border-radius:10px;
+    border:1px solid var(--border-strong); background:var(--surface); color:var(--text); width:100%;
+  }
+  textarea{ height:auto; padding:10px 12px; resize:vertical; min-height:64px; }
+  input:focus, textarea:focus{ outline:none; border-color:var(--accent); box-shadow:0 0 0 3px rgba(15,110,86,0.15); }
+
+  .opt-grid{ display:flex; flex-wrap:wrap; gap:7px; }
+  .opt-btn{
+    display:flex; align-items:center; gap:6px; padding:8px 12px; font-size:12.5px; font-weight:600;
+    border-radius:10px; border:1.5px solid var(--border); background:var(--surface); color:var(--text-secondary);
+  }
+  .opt-btn.active{ }
+
+  .primary-btn{
+    display:flex; align-items:center; gap:6px; justify-content:center;
+    padding:11px 16px; font-size:13.5px; font-weight:700; border:none; border-radius:11px;
+    background:var(--accent); color:#fff;
+  }
+  .primary-btn:disabled{ opacity:0.4; }
+  .secondary-btn{
+    padding:11px 16px; font-size:13.5px; font-weight:700; border-radius:11px;
+    border:1px solid var(--border-strong); background:var(--surface); color:var(--text);
+  }
+  .danger-btn{
+    display:flex; align-items:center; gap:6px; padding:10px 13px; font-size:13px; font-weight:700;
+    border-radius:10px; border:1px solid var(--danger-border); background:transparent; color:var(--danger);
+  }
+  .danger-btn-filled{
+    padding:11px 16px; font-size:13.5px; font-weight:700; border-radius:11px;
+    border:none; background:var(--danger); color:#fff;
+  }
+
+  /* members modal */
+  .member-row{
+    display:flex; align-items:center; justify-content:space-between; padding:10px 12px;
+    border-radius:10px; border:1px solid var(--border); margin-bottom:7px;
+  }
+  .member-row-left{ display:flex; align-items:center; gap:9px; font-size:14px; font-weight:600; }
+  .add-member-row{ display:flex; gap:8px; margin-top:6px; }
+  .icon-btn-sm{
+    width:30px;height:30px;border-radius:8px;border:1px solid var(--border); background:transparent;
+    display:flex;align-items:center;justify-content:center;color:var(--danger);
+  }
+
+  /* svg icon helper */
+  svg{ display:block; }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="topbar-title">
+    <div class="logo-dot">
+      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+    </div>
+    <div>
+      <h1>Agenda familial</h1>
+      <p class="sub">Tous les rendez-vous, en un coup d'œil</p>
+    </div>
+  </div>
+  <div class="topbar-actions">
+    <button class="icon-btn" id="btn-members" aria-label="Gérer les membres">
+      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+    </button>
+  </div>
+</div>
+
+<div class="viewbar">
+  <div class="seg">
+    <button id="seg-cal" class="active">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+      Calendrier
+    </button>
+    <button id="seg-list">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+      Liste
+    </button>
+  </div>
+</div>
+
+<div class="filters">
+  <div class="filter-row">
+    <span class="filter-label">Famille</span>
+    <div class="chip-scroll" id="member-filters"></div>
+  </div>
+  <div class="filter-row">
+    <span class="filter-label">Catégorie</span>
+    <div class="chip-scroll" id="category-filters"></div>
+  </div>
+</div>
+
+<main id="main-content"></main>
+
+<button class="fab" id="fab-add" aria-label="Nouveau rendez-vous">
+  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+</button>
+
+<div id="modal-root"></div>
+
+<script>
+(function(){
+  "use strict";
+
+  // ---------- Config ----------
+  var MEMBER_COLORS = [
+    { key:"violet", dot:"#7F77DD", bg:"#EEEDFE", border:"#AFA9EC", text:"#3C3489" },
+    { key:"teal",   dot:"#1D9E75", bg:"#E1F5EE", border:"#5DCAA5", text:"#085041" },
+    { key:"corail", dot:"#D85A30", bg:"#FAECE7", border:"#F0997B", text:"#712B13" },
+    { key:"rose",   dot:"#D4537E", bg:"#FBEAF0", border:"#ED93B1", text:"#72243E" },
+    { key:"bleu",   dot:"#378ADD", bg:"#E6F1FB", border:"#85B7EB", text:"#0C447C" },
+    { key:"ambre",  dot:"#BA7517", bg:"#FAEEDA", border:"#EF9F27", text:"#633806" }
+  ];
+
+  var ICONS = {
+    medical:'<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg>',
+    sport:'<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/></svg>',
+    ecole:'<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg>',
+    sortie:'<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v4M3 12h4M19 12h2M12 19v2M5 5l2 2M17 5l-2 2M5 19l2-2M19 19l-2-2"/><circle cx="12" cy="12" r="4"/></svg>',
+    famille:'<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>',
+    autre:'<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/></svg>'
+  };
+
+  var CATEGORIES = [
+    { key:"medical", label:"Médical", color:"#D85A30", bg:"#FAECE7", text:"#712B13" },
+    { key:"sport",   label:"Sport",   color:"#1D9E75", bg:"#E1F5EE", text:"#085041" },
+    { key:"ecole",   label:"École",   color:"#378ADD", bg:"#E6F1FB", text:"#0C447C" },
+    { key:"sortie",  label:"Sortie",  color:"#D4537E", bg:"#FBEAF0", text:"#72243E" },
+    { key:"famille", label:"Famille", color:"#7F77DD", bg:"#EEEDFE", text:"#3C3489" },
+    { key:"autre",   label:"Autre",   color:"#888780", bg:"#F1EFE8", text:"#444441" }
+  ];
+
+  var DEFAULT_MEMBERS = [
+    { id:"m1", name:"Maman", color:"violet" },
+    { id:"m2", name:"Papa", color:"teal" },
+    { id:"m3", name:"Enfant", color:"corail" }
+  ];
+
+  var STORAGE_KEY = "family-rdv-state-v1";
+  var WEEKDAYS = ["Lun","Mar","Mer","Jeu","Ven","Sam","Dim"];
+  var MONTHS = ["Janvier","Février","Mars","Avril","Mai","Juin","Juillet","Août","Septembre","Octobre","Novembre","Décembre"];
+  var DAYS_LONG = ["Dimanche","Lundi","Mardi","Mercredi","Jeudi","Vendredi","Samedi"];
+
+  // ---------- State ----------
+  var state = loadState();
+  var view = "calendar";
+  var cursor = (function(){ var d=new Date(); return new Date(d.getFullYear(), d.getMonth(), 1); })();
+  var selectedDate = toISO(new Date());
+  var filterMember = "all";
+  var filterCategory = "all";
+
+  // ---------- Helpers ----------
+  function uid(){ return Math.random().toString(36).slice(2,10)+Date.now().toString(36); }
+  function pad(n){ return String(n).padStart(2,"0"); }
+  function toISO(d){ return d.getFullYear()+"-"+pad(d.getMonth()+1)+"-"+pad(d.getDate()); }
+  function fromISO(s){ var p=s.split("-").map(Number); return new Date(p[0],p[1]-1,p[2]); }
+  function getCat(key){ for(var i=0;i<CATEGORIES.length;i++){ if(CATEGORIES[i].key===key) return CATEGORIES[i]; } return CATEGORIES[CATEGORIES.length-1]; }
+  function getMemberColor(key){ for(var i=0;i<MEMBER_COLORS.length;i++){ if(MEMBER_COLORS[i].key===key) return MEMBER_COLORS[i]; } return MEMBER_COLORS[0]; }
+  function formatDateLong(iso){ var d=fromISO(iso); return DAYS_LONG[d.getDay()]+" "+d.getDate()+" "+MONTHS[d.getMonth()]+" "+d.getFullYear(); }
+  function esc(s){ var div=document.createElement("div"); div.textContent = s==null? "":s; return div.innerHTML; }
+
+  function loadState(){
+    try{
+      var raw = localStorage.getItem(STORAGE_KEY);
+      if(raw){
+        var parsed = JSON.parse(raw);
+        if(parsed && Array.isArray(parsed.events) && Array.isArray(parsed.members)) return parsed;
+      }
+    }catch(e){}
+    return { events:[], members:DEFAULT_MEMBERS.slice() };
+  }
+  function saveState(){
+    try{ localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }catch(e){}
+  }
+
+  function todayISO(){ return toISO(new Date()); }
+
+  function filteredEvents(){
+    return state.events.filter(function(e){
+      if(filterMember!=="all" && e.memberIds.indexOf(filterMember)===-1) return false;
+      if(filterCategory!=="all" && e.category!==filterCategory) return false;
+      return true;
+    });
+  }
+
+  function eventsByDate(list){
+    var map = {};
+    list.forEach(function(e){
+      if(!map[e.date]) map[e.date]=[];
+      map[e.date].push(e);
+    });
+    Object.keys(map).forEach(function(k){
+      map[k].sort(function(a,b){ return (a.time||"99:99").localeCompare(b.time||"99:99"); });
+    });
+    return map;
+  }
+
+  // ---------- Render: filter chips ----------
+  function renderFilters(){
+    var mWrap = document.getElementById("member-filters");
+    var cWrap = document.getElementById("category-filters");
+    mWrap.innerHTML = "";
+    cWrap.innerHTML = "";
+
+    mWrap.appendChild(makeChip("Tous", filterMember==="all", function(){ filterMember="all"; renderAll(); }, null));
+    state.members.forEach(function(m){
+      var c = getMemberColor(m.color);
+      mWrap.appendChild(makeChip(m.name, filterMember===m.id, function(){ filterMember=m.id; renderAll(); }, c.dot));
+    });
+
+    cWrap.appendChild(makeChip("Toutes", filterCategory==="all", function(){ filterCategory="all"; renderAll(); }, null));
+    CATEGORIES.forEach(function(c){
+      cWrap.appendChild(makeChip(c.label, filterCategory===c.key, function(){ filterCategory=c.key; renderAll(); }, c.color));
+    });
+  }
+
+  function makeChip(label, active, onClick, dotColor){
+    var btn = document.createElement("button");
+    btn.className = "chip" + (active ? " active" : "");
+    if(dotColor){
+      var dot = document.createElement("span");
+      dot.className = "chip-dot";
+      dot.style.background = dotColor;
+      btn.appendChild(dot);
+    }
+    btn.appendChild(document.createTextNode(label));
+    btn.addEventListener("click", onClick);
+    return btn;
+  }
+
+  // ---------- Render: main content ----------
+  function renderAll(){
+    renderFilters();
+    document.getElementById("seg-cal").classList.toggle("active", view==="calendar");
+    document.getElementById("seg-list").classList.toggle("active", view==="list");
+    if(view==="calendar") renderCalendar(); else renderList();
+  }
+
+  function renderCalendar(){
+    var main = document.getElementById("main-content");
+    var year = cursor.getFullYear(), month = cursor.getMonth();
+    var firstOfMonth = new Date(year, month, 1);
+    var startOffset = (firstOfMonth.getDay()+6)%7;
+    var daysInMonth = new Date(year, month+1, 0).getDate();
+    var daysInPrevMonth = new Date(year, month, 0).getDate();
+
+    var cells = [];
+    for(var i=0;i<startOffset;i++){
+      var dayNum = daysInPrevMonth-startOffset+i+1;
+      cells.push({ date:new Date(year, month-1, dayNum), inMonth:false });
+    }
+    for(var d=1; d<=daysInMonth; d++){ cells.push({ date:new Date(year,month,d), inMonth:true }); }
+    while(cells.length%7!==0 || cells.length<42){
+      var last = cells[cells.length-1].date;
+      var next = new Date(last); next.setDate(next.getDate()+1);
+      cells.push({ date:next, inMonth:false });
+      if(cells.length>=42) break;
+    }
+
+    var byDate = eventsByDate(filteredEvents());
+    var today = todayISO();
+
+    var html = "";
+    html += '<div class="month-nav">';
+    html += '<button class="nav-btn" id="prev-month" aria-label="Mois précédent"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg></button>';
+    html += '<span class="month-label">'+MONTHS[month]+' '+year+'</span>';
+    html += '<button class="nav-btn" id="next-month" aria-label="Mois suivant"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg></button>';
+    html += '<button class="today-btn" id="goto-today">Aujourd\'hui</button>';
+    html += '</div>';
+
+    html += '<div class="weekday-row">';
+    WEEKDAYS.forEach(function(w){ html += '<div class="weekday-cell">'+w+'</div>'; });
+    html += '</div>';
+
+    html += '<div class="cal-grid">';
+    cells.forEach(function(cell, idx){
+      var iso = toISO(cell.date);
+      var dayEvents = byDate[iso] || [];
+      var isToday = iso===today;
+      var isSelected = iso===selectedDate;
+      var cls = "day-cell" + (cell.inMonth ? "" : " muted") + (isSelected ? " selected" : "");
+      html += '<div class="'+cls+'" data-date="'+iso+'">';
+      html += '<span class="day-num'+(isToday?" today":"")+'">'+cell.date.getDate()+'</span>';
+      if(dayEvents.length>0){
+        html += '<div class="day-dots">';
+        dayEvents.slice(0,4).forEach(function(ev){
+          var cat = getCat(ev.category);
+          html += '<span class="day-dot" style="background:'+cat.color+'"></span>';
+        });
+        html += '</div>';
+      }
+      html += '</div>';
+    });
+    html += '</div>';
+
+    var selDayEvents = byDate[selectedDate] || [];
+    html += '<div class="day-panel">';
+    html += '<div class="day-panel-header"><h2 class="day-panel-title">'+esc(formatDateLong(selectedDate))+'</h2>';
+    html += '<button class="add-small-btn" id="add-for-selected"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Ajouter</button></div>';
+    if(selDayEvents.length===0){
+      html += '<p class="empty-text">Aucun rendez-vous ce jour-là.</p>';
+    } else {
+      html += '<div class="ev-list">';
+      selDayEvents.forEach(function(ev){ html += eventCardHTML(ev); });
+      html += '</div>';
+    }
+    html += '</div>';
+
+    main.innerHTML = html;
+
+    document.getElementById("prev-month").addEventListener("click", function(){ cursor = new Date(year, month-1, 1); renderCalendar(); });
+    document.getElementById("next-month").addEventListener("click", function(){ cursor = new Date(year, month+1, 1); renderCalendar(); });
+    document.getElementById("goto-today").addEventListener("click", function(){
+      var t = new Date();
+      cursor = new Date(t.getFullYear(), t.getMonth(), 1);
+      selectedDate = toISO(t);
+      renderCalendar();
+    });
+    document.getElementById("add-for-selected").addEventListener("click", function(){ openEventModal(null, selectedDate); });
+
+    main.querySelectorAll(".day-cell").forEach(function(el){
+      el.addEventListener("click", function(){
+        selectedDate = el.getAttribute("data-date");
+        renderCalendar();
+      });
+    });
+    main.querySelectorAll(".ev-card").forEach(function(el){
+      el.addEventListener("click", function(){
+        var id = el.getAttribute("data-id");
+        var ev = state.events.find(function(e){ return e.id===id; });
+        if(ev) openEventModal(ev, null);
+      });
+    });
+  }
+
+  function renderList(){
+    var main = document.getElementById("main-content");
+    var list = filteredEvents().slice().sort(function(a,b){
+      var da = a.date+" "+(a.time||"99:99");
+      var db = b.date+" "+(b.time||"99:99");
+      return da.localeCompare(db);
+    });
+
+    if(list.length===0){
+      main.innerHTML = '<div class="list-empty"><svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg><p class="empty-text">Aucun rendez-vous à afficher.</p></div>';
+      return;
+    }
+
+    var map = {};
+    list.forEach(function(e){ if(!map[e.date]) map[e.date]=[]; map[e.date].push(e); });
+    var dates = Object.keys(map).sort();
+    var today = todayISO();
+
+    var html = "";
+    dates.forEach(function(date){
+      html += '<div class="list-group">';
+      html += '<span class="list-group-date'+(date===today?" today":"")+'">'+esc(formatDateLong(date))+'</span>';
+      html += '<div class="ev-list">';
+      map[date].sort(function(a,b){ return (a.time||"99:99").localeCompare(b.time||"99:99"); }).forEach(function(ev){
+        html += eventCardHTML(ev);
+      });
+      html += '</div></div>';
+    });
+    main.innerHTML = html;
+
+    main.querySelectorAll(".ev-card").forEach(function(el){
+      el.addEventListener("click", function(){
+        var id = el.getAttribute("data-id");
+        var ev = state.events.find(function(e){ return e.id===id; });
+        if(ev) openEventModal(ev, null);
+      });
+    });
+  }
+
+  function eventCardHTML(ev){
+    var cat = getCat(ev.category);
+    var members = state.members.filter(function(m){ return ev.memberIds.indexOf(m.id)!==-1; });
+    var html = '<div class="ev-card" data-id="'+ev.id+'">';
+    html += '<div class="ev-icon" style="background:'+cat.bg+';color:'+cat.text+'">'+ICONS[cat.key]+'</div>';
+    html += '<div class="ev-body"><p class="ev-title">'+esc(ev.title)+'</p><div class="ev-meta">';
+    if(ev.time){
+      html += '<span class="ev-meta-item"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>'+esc(ev.time)+'</span>';
+    }
+    if(ev.location){
+      html += '<span class="ev-meta-item"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>'+esc(ev.location)+'</span>';
+    }
+    html += '</div></div>';
+    if(members.length>0){
+      html += '<div class="ev-avatars">';
+      members.forEach(function(m){
+        var c = getMemberColor(m.color);
+        html += '<div class="avatar" style="background:'+c.bg+';color:'+c.text+';border-color:'+c.border+'" title="'+esc(m.name)+'">'+esc(m.name.charAt(0).toUpperCase())+'</div>';
+      });
+      html += '</div>';
+    }
+    html += '</div>';
+    return html;
+  }
+
+  // ---------- Event modal ----------
+  var currentForm = null;
+
+  function openEventModal(ev, dateForNew){
+    currentForm = ev ? Object.assign({}, ev, { memberIds: ev.memberIds.slice() }) : {
+      id:null, title:"", date: dateForNew || selectedDate || todayISO(),
+      time:"", location:"", category:"famille", memberIds:[], notes:""
+    };
+    renderEventModal();
+  }
+
+  function renderEventModal(){
+    var root = document.getElementById("modal-root");
+    var f = currentForm;
+    var isEdit = !!f.id;
+
+    var html = '<div class="overlay" id="ev-overlay"><div class="modal">';
+    html += '<div class="modal-header"><h2 class="modal-title">'+(isEdit?"Modifier le rendez-vous":"Nouveau rendez-vous")+'</h2>';
+    html += '<button class="close-btn" id="ev-close" aria-label="Fermer"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button></div>';
+
+    html += '<div class="modal-body">';
+    html += '<div class="field"><label class="field-label">Titre</label><input type="text" id="f-title" placeholder="Ex. Rendez-vous dentiste" value="'+esc(f.title)+'"></div>';
+
+    html += '<div class="field-row">';
+    html += '<div class="field"><label class="field-label">Date</label><input type="date" id="f-date" value="'+esc(f.date)+'"></div>';
+    html += '<div class="field"><label class="field-label">Heure (optionnel)</label><input type="time" id="f-time" value="'+esc(f.time)+'"></div>';
+    html += '</div>';
+
+    html += '<div class="field"><label class="field-label">Lieu (optionnel)</label><input type="text" id="f-location" placeholder="Ex. Cabinet du Dr Martin" value="'+esc(f.location)+'"></div>';
+
+    html += '<div class="field"><label class="field-label">Catégorie</label><div class="opt-grid" id="f-categories">';
+    CATEGORIES.forEach(function(c){
+      var active = f.category===c.key;
+      var style = active ? ('background:'+c.bg+';color:'+c.text+';border-color:'+c.color) : '';
+      html += '<button type="button" class="opt-btn'+(active?" active":"")+'" data-cat="'+c.key+'" style="'+style+'">'+ICONS[c.key]+c.label+'</button>';
+    });
+    html += '</div></div>';
+
+    html += '<div class="field"><label class="field-label">Concerne</label><div class="opt-grid" id="f-members">';
+    if(state.members.length===0){
+      html += '<p class="empty-text">Ajoute des membres via le bouton en haut.</p>';
+    }
+    state.members.forEach(function(m){
+      var c = getMemberColor(m.color);
+      var active = f.memberIds.indexOf(m.id)!==-1;
+      var style = active ? ('background:'+c.bg+';color:'+c.text+';border-color:'+c.dot) : '';
+      html += '<button type="button" class="opt-btn'+(active?" active":"")+'" data-member="'+m.id+'" style="'+style+'"><span class="chip-dot" style="background:'+c.dot+'"></span>'+esc(m.name)+'</button>';
+    });
+    html += '</div></div>';
+
+    html += '<div class="field"><label class="field-label">Notes (optionnel)</label><textarea id="f-notes" placeholder="Détails supplémentaires...">'+esc(f.notes)+'</textarea></div>';
+    html += '</div>';
+
+    html += '<div class="modal-footer">';
+    if(isEdit){
+      html += '<button class="danger-btn" id="ev-delete"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>Supprimer</button>';
+    } else {
+      html += '<span></span>';
+    }
+    html += '<div class="footer-actions"><button class="secondary-btn" id="ev-cancel">Annuler</button>';
+    html += '<button class="primary-btn" id="ev-save">'+(isEdit?"Enregistrer":"Créer le rendez-vous")+'</button></div>';
+    html += '</div></div></div>';
+
+    root.innerHTML = html;
+
+    document.getElementById("ev-close").addEventListener("click", closeEventModal);
+    document.getElementById("ev-cancel").addEventListener("click", closeEventModal);
+    document.getElementById("ev-overlay").addEventListener("click", function(e){ if(e.target.id==="ev-overlay") closeEventModal(); });
+
+    document.getElementById("f-title").addEventListener("input", function(e){ currentForm.title = e.target.value; updateSaveState(); });
+    document.getElementById("f-date").addEventListener("input", function(e){ currentForm.date = e.target.value; updateSaveState(); });
+    document.getElementById("f-time").addEventListener("input", function(e){ currentForm.time = e.target.value; });
+    document.getElementById("f-location").addEventListener("input", function(e){ currentForm.location = e.target.value; });
+    document.getElementById("f-notes").addEventListener("input", function(e){ currentForm.notes = e.target.value; });
+
+    root.querySelectorAll("#f-categories .opt-btn").forEach(function(btn){
+      btn.addEventListener("click", function(){
+        currentForm.category = btn.getAttribute("data-cat");
+        renderEventModal();
+      });
+    });
+    root.querySelectorAll("#f-members .opt-btn").forEach(function(btn){
+      btn.addEventListener("click", function(){
+        var id = btn.getAttribute("data-member");
+        var idx = currentForm.memberIds.indexOf(id);
+        if(idx===-1) currentForm.memberIds.push(id); else currentForm.memberIds.splice(idx,1);
+        renderEventModal();
+      });
+    });
+
+    if(isEdit){
+      document.getElementById("ev-delete").addEventListener("click", function(){
+        openConfirmDialog("Supprimer ce rendez-vous ?", function(){
+          state.events = state.events.filter(function(e){ return e.id!==currentForm.id; });
+          saveState();
+          closeEventModal();
+          renderAll();
+        });
+      });
+    }
+    document.getElementById("ev-save").addEventListener("click", function(){
+      if(!currentForm.title.trim() || !currentForm.date) return;
+      if(currentForm.id){
+        state.events = state.events.map(function(e){ return e.id===currentForm.id ? Object.assign({}, currentForm) : e; });
+      } else {
+        state.events.push(Object.assign({}, currentForm, { id: uid() }));
+      }
+      saveState();
+      closeEventModal();
+      renderAll();
+    });
+
+    updateSaveState();
+  }
+
+  function updateSaveState(){
+    var btn = document.getElementById("ev-save");
+    if(!btn) return;
+    var ok = currentForm.title.trim() && currentForm.date;
+    btn.disabled = !ok;
+  }
+
+  function closeEventModal(){
+    document.getElementById("modal-root").innerHTML = "";
+    currentForm = null;
+  }
+
+  // ---------- Confirm dialog ----------
+  function openConfirmDialog(message, onConfirm){
+    var root = document.getElementById("modal-root");
+    var html = '<div class="overlay center" id="confirm-overlay"><div class="modal" style="max-width:340px;border-radius:18px;">';
+    html += '<div style="padding:22px 18px 6px;"><p style="font-size:15px;margin:0;">'+esc(message)+'</p></div>';
+    html += '<div class="modal-footer"><span></span><div class="footer-actions"><button class="secondary-btn" id="confirm-cancel">Annuler</button><button class="danger-btn-filled" id="confirm-ok">Supprimer</button></div></div>';
+    html += '</div></div>';
+    root.insertAdjacentHTML("beforeend", html);
+
+    document.getElementById("confirm-cancel").addEventListener("click", function(){
+      document.getElementById("confirm-overlay").remove();
+    });
+    document.getElementById("confirm-overlay").addEventListener("click", function(e){
+      if(e.target.id==="confirm-overlay") document.getElementById("confirm-overlay").remove();
+    });
+    document.getElementById("confirm-ok").addEventListener("click", function(){
+      document.getElementById("confirm-overlay").remove();
+      onConfirm();
+    });
+  }
+
+  // ---------- Members modal ----------
+  function openMembersModal(){
+    var root = document.getElementById("modal-root");
+    renderMembersModal();
+  }
+
+  function renderMembersModal(){
+    var root = document.getElementById("modal-root");
+    var html = '<div class="overlay" id="mem-overlay"><div class="modal" style="max-width:420px;">';
+    html += '<div class="modal-header"><h2 class="modal-title">Membres de la famille</h2>';
+    html += '<button class="close-btn" id="mem-close" aria-label="Fermer"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button></div>';
+    html += '<div class="modal-body">';
+
+    if(state.members.length===0){
+      html += '<p class="empty-text">Aucun membre pour l\'instant.</p>';
+    } else {
+      state.members.forEach(function(m){
+        var c = getMemberColor(m.color);
+        html += '<div class="member-row"><div class="member-row-left"><span class="chip-dot" style="background:'+c.dot+';width:10px;height:10px;"></span><span>'+esc(m.name)+'</span></div>';
+        html += '<button class="icon-btn-sm" data-remove="'+m.id+'" aria-label="Supprimer '+esc(m.name)+'"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg></button></div>';
+      });
+    }
+
+    html += '<div class="add-member-row"><input type="text" id="new-member-name" placeholder="Nom du membre" style="flex:1;"><button class="primary-btn" id="add-member-btn" style="flex-shrink:0;"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Ajouter</button></div>';
+    html += '</div>';
+    html += '<div class="modal-footer"><span></span><button class="secondary-btn" id="mem-done">Fermer</button></div>';
+    html += '</div></div>';
+
+    root.innerHTML = html;
+
+    document.getElementById("mem-close").addEventListener("click", closeMembersModal);
+    document.getElementById("mem-done").addEventListener("click", closeMembersModal);
+    document.getElementById("mem-overlay").addEventListener("click", function(e){ if(e.target.id==="mem-overlay") closeMembersModal(); });
+
+    root.querySelectorAll("[data-remove]").forEach(function(btn){
+      btn.addEventListener("click", function(){
+        var id = btn.getAttribute("data-remove");
+        state.members = state.members.filter(function(m){ return m.id!==id; });
+        state.events = state.events.map(function(e){
+          return Object.assign({}, e, { memberIds: e.memberIds.filter(function(mid){ return mid!==id; }) });
+        });
+        if(filterMember===id) filterMember="all";
+        saveState();
+        renderMembersModal();
+        renderAll();
+      });
+    });
+
+    function addMember(){
+      var input = document.getElementById("new-member-name");
+      var name = input.value.trim();
+      if(!name) return;
+      var usedColors = state.members.map(function(m){ return m.color; });
+      var nextColor = MEMBER_COLORS.find(function(c){ return usedColors.indexOf(c.key)===-1; });
+      var colorKey = nextColor ? nextColor.key : MEMBER_COLORS[state.members.length % MEMBER_COLORS.length].key;
+      state.members.push({ id: uid(), name: name, color: colorKey });
+      saveState();
+      renderMembersModal();
+      renderAll();
+    }
+    document.getElementById("add-member-btn").addEventListener("click", addMember);
+    document.getElementById("new-member-name").addEventListener("keydown", function(e){
+      if(e.key==="Enter") addMember();
+    });
+  }
+
+  function closeMembersModal(){
+    document.getElementById("modal-root").innerHTML = "";
+  }
+
+  // ---------- Top-level listeners ----------
+  document.getElementById("seg-cal").addEventListener("click", function(){ view="calendar"; renderAll(); });
+  document.getElementById("seg-list").addEventListener("click", function(){ view="list"; renderAll(); });
+  document.getElementById("btn-members").addEventListener("click", openMembersModal);
+  document.getElementById("fab-add").addEventListener("click", function(){ openEventModal(null, selectedDate); });
+
+  // ---------- Init ----------
+  renderAll();
+})();
+</script>
+</body>
+</html>
