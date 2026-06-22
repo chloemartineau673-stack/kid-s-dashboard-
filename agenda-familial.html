@@ -179,26 +179,27 @@
     display:flex;align-items:center;justify-content:center; flex-shrink:0; opacity:0.7;
   }
 
-  .kid-tabs{
-    display:flex; gap:0; margin:4px 10px 0;
-    border-radius:8px 8px 0 0; overflow:hidden;
+  /* ---------- Global tabs ---------- */
+  .global-tabs{
+    display:flex; gap:0;
+    background:var(--surface);
+    border-bottom:1.5px solid var(--border);
+    padding:0 14px;
   }
-  .kid-tab{
-    flex:1; padding:6px 4px; font-size:10px; font-weight:800; border:none;
-    background:rgba(255,255,255,0.25); color:inherit; opacity:0.65;
-    cursor:pointer; text-align:center; transition:background 0.15s, opacity 0.15s;
-    line-height:1.2;
+  .global-tab{
+    flex:1; padding:11px 6px 9px; font-size:13px; font-weight:800; border:none;
+    background:transparent; color:var(--text-tertiary);
+    cursor:pointer; text-align:center; border-bottom:2.5px solid transparent;
+    transition:color 0.15s, border-color 0.15s;
+    display:flex; align-items:center; justify-content:center; gap:5px;
   }
-  .kid-tab.active{
-    background:rgba(255,255,255,0.6); opacity:1;
-    border-bottom:2px solid rgba(0,0,0,0.18);
+  .global-tab.active{
+    color:var(--accent); border-bottom-color:var(--accent);
   }
-  .kid-tab:first-child{ border-radius:8px 0 0 0; }
-  .kid-tab:last-child{ border-radius:0 8px 0 0; }
 
   .kid-postit{
-    margin:0 10px 12px;
-    border-radius:0 0 8px 8px;
+    margin:6px 10px 12px;
+    border-radius:8px;
     padding:10px 10px 11px;
     min-height:110px;
     display:flex; flex-direction:column; gap:7px;
@@ -512,6 +513,11 @@
   </div>
 </div>
 
+<div class="global-tabs" id="global-tabs">
+  <button class="global-tab active" data-global-tab="college">🎒 Collège</button>
+  <button class="global-tab" data-global-tab="activites">⭐ Activités extrascolaires</button>
+</div>
+
 <main>
   <div class="kids-row" id="kids-row"></div>
   <div class="bottom-row">
@@ -604,7 +610,7 @@
 
   // ---------- State ----------
   var state = { events:[], members: DEFAULT_KIDS.slice(), notes:[] };
-  var kidTabState = {}; // kidId -> "college" | "activites"
+  var activeGlobalTab = "college"; // "college" | "activites"
   var miniCalCursor = (function(){ var d=new Date(); return new Date(d.getFullYear(), d.getMonth(), 1); })();
   var db = null;
   var docRef = null;
@@ -721,9 +727,8 @@
 
     state.members.forEach(function(m){
       var c = getKidColor(m.color);
-      var activeTab = kidTabState[m.id] || "college";
       var upcoming = state.events
-        .filter(function(e){ return e.memberIds.indexOf(m.id)!==-1 && e.date >= today && (e.category||"college")===activeTab; })
+        .filter(function(e){ return e.memberIds.indexOf(m.id)!==-1 && e.date >= today && (e.category||"college")===activeGlobalTab; })
         .sort(function(a,b){
           var da = a.date+" "+(a.time||"99:99");
           var db = b.date+" "+(b.time||"99:99");
@@ -739,11 +744,6 @@
       headerHTML += '<div class="kid-card-name"><span class="kid-card-avatar" style="background:'+c.dot+'">'+esc(m.name.charAt(0).toUpperCase())+'</span><span>'+esc(m.name)+'</span></div>';
       headerHTML += '<button class="kid-card-edit" data-edit-kid="'+m.id+'" style="color:'+c.text+'" aria-label="Modifier"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.12 2.12 0 0 1 3 3L12 15l-4 1 1-4Z"/></svg></button>';
       headerHTML += '</div>';
-
-      var tabsHTML = '<div class="kid-tabs">'
-        + '<button class="kid-tab'+(activeTab==="college"?" active":"")+'" data-tab-kid="'+m.id+'" data-tab="college">🎒 Collège</button>'
-        + '<button class="kid-tab'+(activeTab==="activites"?" active":"")+'" data-tab-kid="'+m.id+'" data-tab="activites">⭐ Activités</button>'
-        + '</div>';
 
       var postitHTML = '<div class="kid-postit" data-add-for="'+m.id+'" style="color:'+c.text+'">';
       if(upcoming.length===0){
@@ -765,18 +765,8 @@
       }
       postitHTML += '</div>';
 
-      card.innerHTML = headerHTML + tabsHTML + postitHTML;
+      card.innerHTML = headerHTML + postitHTML;
       wrap.appendChild(card);
-    });
-
-    // Tab listeners
-    wrap.querySelectorAll("[data-tab-kid]").forEach(function(btn){
-      btn.addEventListener("click", function(e){
-        e.stopPropagation();
-        var kidId = btn.getAttribute("data-tab-kid");
-        kidTabState[kidId] = btn.getAttribute("data-tab");
-        renderKidsRow();
-      });
     });
 
     // Listeners
@@ -948,7 +938,7 @@
     currentForm = ev ? Object.assign({}, ev, { memberIds: ev.memberIds.slice() }) : {
       id:null, title:"", date: dateForNew || todayISO(),
       time:"", location:"", memberIds: presetKidId ? [presetKidId] : [], notes:"",
-      category: (presetKidId ? (kidTabState[presetKidId] || "college") : "college")
+      category: activeGlobalTab
     };
     renderEventModal();
   }
@@ -1262,6 +1252,17 @@
   function closeMembersModal(){
     document.getElementById("modal-root").innerHTML = "";
   }
+
+  // ---------- Global tabs ----------
+  document.querySelectorAll("[data-global-tab]").forEach(function(btn){
+    btn.addEventListener("click", function(){
+      activeGlobalTab = btn.getAttribute("data-global-tab");
+      document.querySelectorAll("[data-global-tab]").forEach(function(b){
+        b.classList.toggle("active", b === btn);
+      });
+      renderKidsRow();
+    });
+  });
 
   // ---------- Top-level listeners ----------
   document.getElementById("btn-members").addEventListener("click", openMembersModal);
