@@ -12,6 +12,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
 <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-storage-compat.js"></script>
 <style>
   :root{
     --bg:#F5F4FF;
@@ -234,6 +235,28 @@
     cursor:pointer;
   }
   .cat-add-center-label{ font-size:13px; font-weight:700; color:var(--text-tertiary); }
+
+  /* ---------- Photos ---------- */
+  .cat-item-photo{
+    width:100%; border-radius:10px; margin-top:8px;
+    max-height:180px; object-fit:cover; display:block;
+  }
+  .photo-upload-zone{
+    border:2px dashed var(--border-strong); border-radius:12px;
+    padding:18px; text-align:center; cursor:pointer;
+    background:var(--surface-2); color:var(--text-secondary);
+    font-size:13px; font-weight:700; display:flex; flex-direction:column;
+    align-items:center; gap:8px;
+  }
+  .photo-upload-zone:hover{ background:var(--accent-light); border-color:var(--accent); }
+  .photo-preview{
+    width:100%; border-radius:10px; max-height:160px;
+    object-fit:cover; display:block; margin-top:4px;
+  }
+  .photo-remove-btn{
+    margin-top:6px; font-size:12px; font-weight:700; color:var(--danger);
+    background:none; border:none; cursor:pointer; padding:0;
+  }
 
   .kid-postit{
     margin:6px 10px 12px;
@@ -602,11 +625,11 @@
   <main>
     <div class="kids-row" id="kids-row"></div>
     <div class="bottom-row">
-      <div class="mini-cal-card" id="mini-cal-card"></div>
       <div style="display:flex;flex-direction:column;gap:22px;">
-        <div class="notes-card" id="notes-card"></div>
         <div class="todo-card" id="todo-card"></div>
+        <div class="mini-cal-card" id="mini-cal-card"></div>
       </div>
+      <div class="notes-card" id="notes-card"></div>
     </div>
   </main>
 </div>
@@ -926,7 +949,9 @@
       html += '<div class="cat-item" data-cat-edit="'+ev.id+'">';
       html += '<div class="cat-item-dot" style="background:'+dotColor+'"></div>';
       html += '<div class="cat-item-info"><div class="cat-item-title">'+esc(ev.title)+'</div>';
-      html += '<div class="cat-item-meta">'+esc(metaParts.join(" · "))+'</div></div></div>';
+      html += '<div class="cat-item-meta">'+esc(metaParts.join(" · "))+'</div>';
+      if(ev.photoUrl) html += '<img class="cat-item-photo" src="'+esc(ev.photoUrl)+'" alt="photo">';
+      html += '</div></div>';
     });
     var label = cat==="college" ? "Ajouter dans Collège" : "Ajouter dans Activités";
     html += '<div class="cat-add-center"><button class="cat-add-center-btn" id="cat-add-center-'+cat+'" aria-label="Ajouter"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></button><span class="cat-add-center-label">'+label+'</span></div>';
@@ -1204,6 +1229,18 @@
     html += '<div class="field"><label class="field-label">Lieu (optionnel)</label><input type="text" id="f-location" placeholder="Ex. Cabinet du Dr Martin" value="'+esc(f.location)+'"></div>';
 
     html += '<div class="field"><label class="field-label">Notes (optionnel)</label><textarea id="f-notes" placeholder="Détails supplémentaires...">'+esc(f.notes)+'</textarea></div>';
+
+    if(cat==="college" || cat==="activites"){
+      html += '<div class="field"><label class="field-label">Photo (optionnel)</label>';
+      if(f.photoUrl){
+        html += '<img class="photo-preview" src="'+esc(f.photoUrl)+'" alt="photo">';
+        html += '<button class="photo-remove-btn" id="photo-remove">✕ Supprimer la photo</button>';
+      } else {
+        html += '<div class="photo-upload-zone" id="photo-zone"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg><span>Appuyer pour ajouter une photo</span></div>';
+      }
+      html += '<input type="file" id="photo-input" accept="image/*" style="display:none">';
+      html += '</div>';
+    }
     html += '</div>';
 
     html += '<div class="modal-footer">';
@@ -1232,6 +1269,42 @@
       document.getElementById("cat-activites").style.cssText = "background:var(--accent-light);border-color:var(--accent);color:var(--accent-text)";
       document.getElementById("cat-college").style.cssText = "";
     });
+
+    // Photo listeners
+    var photoInput = document.getElementById("photo-input");
+    var photoZone = document.getElementById("photo-zone");
+    var photoRemove = document.getElementById("photo-remove");
+    if(photoZone){ photoZone.addEventListener("click", function(){ photoInput.click(); }); }
+    if(photoRemove){ photoRemove.addEventListener("click", function(){ currentForm.photoUrl = ""; renderEventModal(); }); }
+    if(photoInput){
+      photoInput.addEventListener("change", function(){
+        var file = photoInput.files[0];
+        if(!file) return;
+        var reader = new FileReader();
+        reader.onload = function(e){
+          // Compresse via canvas avant upload
+          var img = new Image();
+          img.onload = function(){
+            var canvas = document.createElement("canvas");
+            var max = 800;
+            var w = img.width, h = img.height;
+            if(w > max){ h = Math.round(h*max/w); w = max; }
+            canvas.width = w; canvas.height = h;
+            canvas.getContext("2d").drawImage(img, 0, 0, w, h);
+            canvas.toBlob(function(blob){
+              var storage = firebase.storage();
+              var ref = storage.ref("photos/" + uid() + ".jpg");
+              ref.put(blob).then(function(snap){ return snap.ref.getDownloadURL(); }).then(function(url){
+                currentForm.photoUrl = url;
+                renderEventModal();
+              }).catch(function(){ alert("Erreur lors de l'envoi de la photo."); });
+            }, "image/jpeg", 0.82);
+          };
+          img.src = e.target.result;
+        };
+        reader.readAsDataURL(file);
+      });
+    }
 
     document.getElementById("f-title").addEventListener("input", function(e){ currentForm.title = e.target.value; updateSaveState(); });
     document.getElementById("f-date").addEventListener("input", function(e){ currentForm.date = e.target.value; updateSaveState(); });
