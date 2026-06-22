@@ -221,14 +221,19 @@
     text-align:center; color:var(--text-tertiary); font-size:13px;
     padding:40px 20px;
   }
-  .cat-add-fab{
-    position:fixed; right:18px; bottom:calc(env(safe-area-inset-bottom) + 70px); z-index:25;
-    width:52px; height:52px; border-radius:50%;
+  .cat-add-fab{ display:none; }
+  .cat-add-center{
+    display:flex; flex-direction:column; align-items:center; justify-content:center;
+    gap:10px; padding:40px 20px;
+  }
+  .cat-add-center-btn{
+    width:56px; height:56px; border-radius:50%;
     background:var(--accent); color:#fff; border:none;
     display:flex; align-items:center; justify-content:center;
     box-shadow:0 4px 14px rgba(123,111,245,0.45);
+    cursor:pointer;
   }
-  .cat-add-fab.hidden{ display:none; }
+  .cat-add-center-label{ font-size:13px; font-weight:700; color:var(--text-tertiary); }
 
   .kid-postit{
     margin:6px 10px 12px;
@@ -598,9 +603,11 @@
     <div class="kids-row" id="kids-row"></div>
     <div class="bottom-row">
       <div class="mini-cal-card" id="mini-cal-card"></div>
-      <div class="notes-card" id="notes-card"></div>
+      <div style="display:flex;flex-direction:column;gap:22px;">
+        <div class="notes-card" id="notes-card"></div>
+        <div class="todo-card" id="todo-card"></div>
+      </div>
     </div>
-    <div class="todo-card" id="todo-card"></div>
   </main>
 </div>
 
@@ -909,22 +916,20 @@
       .sort(function(a,b){ return (a.date+" "+(a.time||"99:99")).localeCompare(b.date+" "+(b.time||"99:99")); });
 
     var html = "";
-    if(filtered.length===0){
-      html = '<div class="cat-empty">Aucun élément.<br>Appuyez sur + pour ajouter.</div>';
-    } else {
-      filtered.forEach(function(ev){
-        var members = state.members.filter(function(m){ return ev.memberIds.indexOf(m.id)!==-1; });
-        var dotColor = members.length ? getKidColor(members[0].color).hex : "#aaa";
-        var metaParts = [formatDateShort(ev.date)];
-        if(ev.time) metaParts.push(ev.time);
-        if(ev.location) metaParts.push(ev.location);
-        if(members.length) metaParts.push(members.map(function(m){ return m.name; }).join(", "));
-        html += '<div class="cat-item" data-cat-edit="'+ev.id+'">';
-        html += '<div class="cat-item-dot" style="background:'+dotColor+'"></div>';
-        html += '<div class="cat-item-info"><div class="cat-item-title">'+esc(ev.title)+'</div>';
-        html += '<div class="cat-item-meta">'+esc(metaParts.join(" · "))+'</div></div></div>';
-      });
-    }
+    filtered.forEach(function(ev){
+      var members = state.members.filter(function(m){ return ev.memberIds.indexOf(m.id)!==-1; });
+      var dotColor = members.length ? getKidColor(members[0].color).hex : "#aaa";
+      var metaParts = [formatDateShort(ev.date)];
+      if(ev.time) metaParts.push(ev.time);
+      if(ev.location) metaParts.push(ev.location);
+      if(members.length) metaParts.push(members.map(function(m){ return m.name; }).join(", "));
+      html += '<div class="cat-item" data-cat-edit="'+ev.id+'">';
+      html += '<div class="cat-item-dot" style="background:'+dotColor+'"></div>';
+      html += '<div class="cat-item-info"><div class="cat-item-title">'+esc(ev.title)+'</div>';
+      html += '<div class="cat-item-meta">'+esc(metaParts.join(" · "))+'</div></div></div>';
+    });
+    var label = cat==="college" ? "Ajouter dans Collège" : "Ajouter dans Activités";
+    html += '<div class="cat-add-center"><button class="cat-add-center-btn" id="cat-add-center-'+cat+'" aria-label="Ajouter"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></button><span class="cat-add-center-label">'+label+'</span></div>';
     wrap.innerHTML = html;
 
     wrap.querySelectorAll("[data-cat-edit]").forEach(function(el){
@@ -933,6 +938,9 @@
         if(ev) openEventModal(ev, null, null);
       });
     });
+
+    var addBtn = document.getElementById("cat-add-center-"+cat);
+    if(addBtn) addBtn.addEventListener("click", function(){ openEventModal(null, null, null); });
   }
 
   // ---------- Kid columns ----------
