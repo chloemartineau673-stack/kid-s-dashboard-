@@ -26,14 +26,15 @@
     --danger:#A32D2D;
     --danger-bg:#FCEBEB;
     --danger-border:#F09595;
-    --nina-dot:#9C9BE0; --nina-bg:#EFEEFB; --nina-border:#C2C0EF; --nina-text:#3C3489;
-    --ilhan-dot:#E8C24D; --ilhan-bg:#FBF3DE; --ilhan-border:#EFD988; --ilhan-text:#6B4E0A;
-    --notes-dot:#9BC9A8; --notes-bg:#E9F5EC; --notes-border:#BBE0C7; --notes-text:#1F5A35;
+    --nina-dot:#8B7FE8; --nina-bg:#C9C0F7; --nina-border:#8B7FE8; --nina-text:#3A2A8C;
+    --ilhan-dot:#F2C230; --ilhan-bg:#FCE680; --ilhan-border:#E8AE0E; --ilhan-text:#6B4E0A;
+    --notes-dot:#5FCC8C; --notes-bg:#A8E8C0; --notes-border:#3FAE6E; --notes-text:#0F4D2A;
+    --pin-color:#FFFFFF; --pin-shadow-color:#C9C5B8;
     --radius-sm:6px;
     --radius-md:10px;
     --radius-lg:16px;
     --shadow-modal:0 12px 32px rgba(30,28,20,0.18);
-    --shadow-postit:0 3px 8px rgba(40,35,20,0.10);
+    --shadow-postit:0 6px 14px rgba(40,35,20,0.22), 0 2px 4px rgba(40,35,20,0.12);
   }
   *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
   html,body{margin:0;padding:0;}
@@ -80,79 +81,102 @@
   main{ padding:16px 14px 28px; }
 
   .kids-row{
-    display:grid; grid-template-columns:1fr 1fr; gap:11px;
-    margin-bottom:14px;
+    display:grid; grid-template-columns:1fr 1fr; gap:18px;
+    margin-bottom:22px;
+    padding-top:10px;
   }
 
   .kid-card{
-    border-radius:18px;
-    border:2.5px solid;
-    background:var(--surface);
-    overflow:hidden;
+    position:relative;
+    border-radius:4px 4px 8px 8px;
+    overflow:visible;
     display:flex; flex-direction:column;
+    box-shadow:var(--shadow-postit);
+    transform:rotate(var(--tilt, -2deg));
+    transition:transform 0.15s ease;
   }
+  .kid-card:nth-child(2){ --tilt:2deg; }
+  .kid-card:active{ transform:rotate(0deg) scale(1.02); }
+
+  .postit-pin{
+    position:absolute; top:-9px; left:50%; transform:translateX(-50%);
+    width:17px; height:17px; border-radius:50%;
+    background:radial-gradient(circle at 35% 30%, #ffffff 0%, #e2e2e2 55%, #b8b8b8 100%);
+    box-shadow:0 2px 3px rgba(0,0,0,0.35), inset 0 -1px 1px rgba(0,0,0,0.15);
+    z-index:5;
+  }
+  .postit-pin::after{
+    content:""; position:absolute; inset:4px; border-radius:50%;
+    background:radial-gradient(circle at 35% 30%, #ffffff 0%, #d8d8d8 100%);
+  }
+
   .kid-card-header{
-    display:flex; align-items:center; justify-content:space-between;
-    gap:6px; padding:10px 12px;
+    display:flex; align-items:center; justify-content:center; position:relative;
+    gap:6px; padding:18px 12px 4px;
   }
   .kid-card-name{
-    display:flex; align-items:center; gap:8px;
-    font-size:15px; font-weight:800;
+    display:flex; flex-direction:column; align-items:center; gap:6px;
+    font-size:17px; font-weight:800; text-align:center;
   }
   .kid-card-avatar{
-    width:28px;height:28px;border-radius:50%; flex-shrink:0;
+    width:34px;height:34px;border-radius:50%; flex-shrink:0;
     display:flex; align-items:center; justify-content:center;
-    font-size:12.5px; font-weight:800; color:#fff;
+    font-size:14px; font-weight:800; color:#fff;
+    box-shadow:0 2px 4px rgba(0,0,0,0.18);
   }
   .kid-card-edit{
-    width:26px;height:26px;border-radius:8px;border:none;background:transparent;
-    display:flex;align-items:center;justify-content:center; flex-shrink:0; opacity:0.55;
+    position:absolute; top:8px; right:8px;
+    width:24px;height:24px;border-radius:7px;border:none;background:rgba(255,255,255,0.4);
+    display:flex;align-items:center;justify-content:center; flex-shrink:0; opacity:0.7;
   }
 
   .kid-postit{
-    margin:0 9px 9px;
-    border-radius:13px;
-    padding:11px 11px 12px;
-    min-height:120px;
+    margin:6px 10px 12px;
+    border-radius:8px;
+    padding:10px 10px 11px;
+    min-height:110px;
     display:flex; flex-direction:column; gap:7px;
-    box-shadow:var(--shadow-postit);
+    background:rgba(255,255,255,0.35);
   }
   .kid-postit-empty{
     flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center;
     gap:6px; padding:10px 4px; text-align:center;
   }
-  .kid-postit-empty span{ font-size:12px; font-weight:600; opacity:0.65; }
+  .kid-postit-empty span{ font-size:12px; font-weight:700; opacity:0.7; }
   .kid-postit-add-hint{
-    display:flex; align-items:center; gap:5px; font-size:11px; font-weight:700; opacity:0.8;
+    display:flex; align-items:center; gap:5px; font-size:11px; font-weight:800; opacity:0.85;
   }
 
   .rdv-item{
-    background:rgba(255,255,255,0.6);
-    border-radius:10px;
+    background:rgba(255,255,255,0.65);
+    border-radius:8px;
     padding:8px 9px;
   }
-  .rdv-item-title{ font-size:13px; font-weight:700; margin:0; line-height:1.25; }
+  .rdv-item-title{ font-size:13px; font-weight:800; margin:0; line-height:1.25; }
   .rdv-item-meta{ display:flex; gap:8px; margin-top:3px; flex-wrap:wrap; }
-  .rdv-item-meta span{ display:flex; align-items:center; gap:3px; font-size:10.5px; font-weight:600; opacity:0.75; }
+  .rdv-item-meta span{ display:flex; align-items:center; gap:3px; font-size:10.5px; font-weight:700; opacity:0.8; }
   .rdv-item-del{
     margin-top:5px; display:inline-flex; align-items:center; gap:3px;
-    font-size:10px; font-weight:700; opacity:0.55; background:none; border:none; padding:0;
+    font-size:10px; font-weight:700; opacity:0.6; background:none; border:none; padding:0;
   }
 
   .kid-postit-footer{
     display:flex; align-items:center; justify-content:center; gap:6px;
-    padding:8px 6px 2px; font-size:11.5px; font-weight:700; opacity:0.7;
-    border-top:1px dashed rgba(0,0,0,0.12); margin-top:2px;
+    padding:8px 6px 2px; font-size:11.5px; font-weight:800; opacity:0.8;
+    border-top:1px dashed rgba(0,0,0,0.18); margin-top:2px;
   }
 
   /* ---------- Bottom row: mini calendar + notes ---------- */
   .bottom-row{
-    display:grid; grid-template-columns:1fr 1fr; gap:11px;
+    display:grid; grid-template-columns:1fr 1fr; gap:18px;
+    align-items:start;
+    padding-top:10px;
   }
 
   .mini-cal-card{
-    border-radius:16px; border:1.5px solid var(--border); background:var(--surface);
+    border-radius:14px; border:1.5px solid var(--border); background:var(--surface);
     padding:11px 10px 12px;
+    box-shadow:0 2px 6px rgba(40,35,20,0.08);
   }
   .mini-cal-header{ display:flex; align-items:center; justify-content:space-between; margin-bottom:7px; }
   .mini-cal-title{ font-size:12.5px; font-weight:800; }
@@ -175,15 +199,19 @@
   .mini-day-dot{ width:3.5px;height:3.5px;border-radius:50%; }
 
   .notes-card{
-    border-radius:16px; border:2.5px solid var(--notes-border);
+    position:relative;
+    border-radius:4px 4px 8px 8px;
     background:var(--notes-bg); color:var(--notes-text);
-    padding:11px 11px 10px;
+    padding:18px 11px 11px;
     display:flex; flex-direction:column;
+    box-shadow:var(--shadow-postit);
+    transform:rotate(1.5deg);
   }
-  .notes-card-header{ display:flex; align-items:center; justify-content:space-between; margin-bottom:7px; }
-  .notes-card-title{ font-size:13px; font-weight:800; display:flex; align-items:center; gap:6px; }
+  .notes-card-header{ display:flex; align-items:center; justify-content:center; margin-bottom:9px; position:relative; }
+  .notes-card-title{ font-size:14px; font-weight:800; display:flex; align-items:center; gap:6px; }
   .notes-add-btn{
-    width:24px;height:24px;border-radius:7px;border:none;background:rgba(255,255,255,0.6);
+    position:absolute; right:0; top:50%; transform:translateY(-50%);
+    width:24px;height:24px;border-radius:7px;border:none;background:rgba(255,255,255,0.55);
     display:flex;align-items:center;justify-content:center;color:var(--notes-text); flex-shrink:0;
   }
   .notes-list{ display:flex; flex-direction:column; gap:6px; max-height:160px; overflow-y:auto; }
@@ -512,14 +540,15 @@
 
       var card = document.createElement("div");
       card.className = "kid-card";
-      card.style.borderColor = c.dot;
+      card.style.background = c.bg;
 
-      var headerHTML = '<div class="kid-card-header" style="background:'+c.bg+';color:'+c.text+'">';
-      headerHTML += '<div class="kid-card-name"><span class="kid-card-avatar" style="background:'+c.dot+'">'+esc(m.name.charAt(0).toUpperCase())+'</span>'+esc(m.name)+'</div>';
+      var headerHTML = '<div class="postit-pin"></div>';
+      headerHTML += '<div class="kid-card-header" style="color:'+c.text+'">';
+      headerHTML += '<div class="kid-card-name"><span class="kid-card-avatar" style="background:'+c.dot+'">'+esc(m.name.charAt(0).toUpperCase())+'</span><span>'+esc(m.name)+'</span></div>';
       headerHTML += '<button class="kid-card-edit" data-edit-kid="'+m.id+'" style="color:'+c.text+'" aria-label="Modifier"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.12 2.12 0 0 1 3 3L12 15l-4 1 1-4Z"/></svg></button>';
       headerHTML += '</div>';
 
-      var postitHTML = '<div class="kid-postit" data-add-for="'+m.id+'" style="background:'+c.bg+';color:'+c.text+'">';
+      var postitHTML = '<div class="kid-postit" data-add-for="'+m.id+'" style="color:'+c.text+'">';
       if(upcoming.length===0){
         postitHTML += '<div class="kid-postit-empty">';
         postitHTML += '<span>Aucun RDV à venir</span>';
@@ -652,7 +681,7 @@
       return da.localeCompare(db);
     });
 
-    var html = '<div class="notes-card-header"><span class="notes-card-title"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3v4a1 1 0 0 0 1 1h4"/><path d="M17 21H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h7l5 5v11a2 2 0 0 1-2 2Z"/></svg>Notes</span>';
+    var html = '<div class="postit-pin"></div><div class="notes-card-header"><span class="notes-card-title"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3v4a1 1 0 0 0 1 1h4"/><path d="M17 21H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h7l5 5v11a2 2 0 0 1-2 2Z"/></svg>Notes</span>';
     html += '<button class="notes-add-btn" id="notes-add-btn" aria-label="Ajouter une note"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></button></div>';
 
     if(sorted.length===0){
