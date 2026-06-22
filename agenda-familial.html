@@ -236,27 +236,39 @@
   }
   .cat-add-center-label{ font-size:13px; font-weight:700; color:var(--text-tertiary); }
 
-  /* ---------- Photos ---------- */
-  .cat-item-photo{
-    width:100%; border-radius:10px; margin-top:8px;
-    max-height:180px; object-fit:cover; display:block;
+  /* ---------- Emploi du temps ---------- */
+  .sched-days{
+    display:flex; gap:6px; padding:0 14px 12px; overflow-x:auto;
   }
-  .photo-upload-zone{
-    border:2px dashed var(--border-strong); border-radius:12px;
-    padding:18px; text-align:center; cursor:pointer;
-    background:var(--surface-2); color:var(--text-secondary);
-    font-size:13px; font-weight:700; display:flex; flex-direction:column;
-    align-items:center; gap:8px;
+  .sched-day-btn{
+    flex-shrink:0; padding:7px 14px; border-radius:20px; border:1.5px solid var(--border);
+    background:var(--surface); color:var(--text-secondary);
+    font-size:13px; font-weight:800; cursor:pointer; transition:all 0.15s;
   }
-  .photo-upload-zone:hover{ background:var(--accent-light); border-color:var(--accent); }
-  .photo-preview{
-    width:100%; border-radius:10px; max-height:160px;
-    object-fit:cover; display:block; margin-top:4px;
+  .sched-day-btn.active{
+    background:var(--accent); border-color:var(--accent); color:#fff;
   }
-  .photo-remove-btn{
-    margin-top:6px; font-size:12px; font-weight:700; color:var(--danger);
-    background:none; border:none; cursor:pointer; padding:0;
+  .sched-list{ padding:0 14px; display:flex; flex-direction:column; gap:10px; }
+  .sched-item{
+    display:flex; align-items:stretch; gap:0;
+    border-radius:12px; overflow:hidden;
+    border:1.5px solid var(--border);
+    background:var(--surface); cursor:pointer;
   }
+  .sched-item-color{ width:5px; flex-shrink:0; }
+  .sched-item-body{ flex:1; padding:11px 13px; }
+  .sched-item-subject{ font-size:14px; font-weight:800; }
+  .sched-item-meta{ font-size:11.5px; color:var(--text-tertiary); margin-top:3px; display:flex; gap:10px; }
+  .sched-empty{
+    text-align:center; color:var(--text-tertiary); font-size:13px; padding:40px 20px;
+  }
+  .sched-add-btn{
+    display:flex; align-items:center; justify-content:center; gap:8px;
+    margin:16px 14px 0; padding:13px; border-radius:12px;
+    border:1.5px dashed var(--border-strong); background:transparent;
+    color:var(--text-secondary); font-size:13px; font-weight:700; cursor:pointer; width:calc(100% - 28px);
+  }
+  .sched-add-btn:hover{ background:var(--surface-2); }
 
   .kid-postit{
     margin:6px 10px 12px;
@@ -637,9 +649,16 @@
 <!-- Page Collège -->
 <div class="page" id="page-college">
   <div class="cat-page-header">
-    <span class="cat-page-title">🎒 Collège</span>
+    <span class="cat-page-title">🎒 Emploi du temps</span>
   </div>
-  <div id="cat-college-list"></div>
+  <div class="sched-days" id="sched-days">
+    <button class="sched-day-btn active" data-day="lundi">Lun</button>
+    <button class="sched-day-btn" data-day="mardi">Mar</button>
+    <button class="sched-day-btn" data-day="mercredi">Mer</button>
+    <button class="sched-day-btn" data-day="jeudi">Jeu</button>
+    <button class="sched-day-btn" data-day="vendredi">Ven</button>
+  </div>
+  <div id="sched-list"></div>
 </div>
 
 <!-- Page Activités -->
@@ -754,7 +773,8 @@
   var DAYS_LONG = ["Dimanche","Lundi","Mardi","Mercredi","Jeudi","Vendredi","Samedi"];
 
   // ---------- State ----------
-  var state = { events:[], members: DEFAULT_KIDS.slice(), notes:[], todos:[] };
+  var state = { events:[], members: DEFAULT_KIDS.slice(), notes:[], todos:[], schedule:[] };
+  var scheduleDay = "lundi";
   var activePage = "home"; // "home" | "college" | "activites"
   var miniCalCursor = (function(){ var d=new Date(); return new Date(d.getFullYear(), d.getMonth(), 1); })();
   var db = null;
@@ -828,6 +848,7 @@
       state.members = Array.isArray(data.members) && data.members.length ? data.members : DEFAULT_KIDS.slice();
       state.notes = Array.isArray(data.notes) ? data.notes : [];
       state.todos = Array.isArray(data.todos) ? data.todos : [];
+      state.schedule = Array.isArray(data.schedule) ? data.schedule : [];
       applyingRemoteUpdate = false;
       setSyncStatus("Synchronisé");
       renderAll();
@@ -842,7 +863,7 @@
     setSyncStatus("Synchronisation...", true);
     clearTimeout(saveDebounceTimer);
     saveDebounceTimer = setTimeout(function(){
-      docRef.set({ events: state.events, members: state.members, notes: state.notes, todos: state.todos, updatedAt: Date.now() })
+      docRef.set({ events: state.events, members: state.members, notes: state.notes, todos: state.todos, schedule: state.schedule, updatedAt: Date.now() })
         .then(function(){ setSyncStatus("Synchronisé"); })
         .catch(function(){ setSyncStatus("Erreur de sync", true); });
     }, 250);
@@ -863,8 +884,161 @@
     renderMiniCalendar();
     renderNotes();
     renderTodos();
-    renderCategoryPage("college");
+    renderSchedule();
     renderCategoryPage("activites");
+  }
+
+  // ---------- Emploi du temps ----------
+  var COURSE_COLORS = ["#7B6FF5","#FF7B7B","#34EE9A","#60C8FF","#FDE047","#FF80D5","#FF9F5A"];
+
+  function renderSchedule(){
+    var list = document.getElementById("sched-list");
+    if(!list) return;
+    var courses = state.schedule
+      .filter(function(c){ return c.day === scheduleDay; })
+      .sort(function(a,b){ return (a.startTime||"").localeCompare(b.startTime||""); });
+
+    var html = '<div class="sched-list">';
+    if(courses.length === 0){
+      html += '<div class="sched-empty">Aucun cours ce jour.<br>Appuyez sur + pour en ajouter.</div>';
+    } else {
+      courses.forEach(function(c){
+        html += '<div class="sched-item" data-edit-course="'+c.id+'">';
+        html += '<div class="sched-item-color" style="background:'+(c.color||COURSE_COLORS[0])+'"></div>';
+        html += '<div class="sched-item-body">';
+        html += '<div class="sched-item-subject">'+esc(c.subject)+'</div>';
+        html += '<div class="sched-item-meta">';
+        if(c.startTime||c.endTime) html += '<span>'+esc((c.startTime||'')+(c.endTime?' – '+c.endTime:''))+'</span>';
+        if(c.room) html += '<span>'+esc(c.room)+'</span>';
+        if(c.teacher) html += '<span>'+esc(c.teacher)+'</span>';
+        html += '</div></div></div>';
+      });
+    }
+    html += '</div>';
+    html += '<button class="sched-add-btn" id="sched-add-btn"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Ajouter un cours</button>';
+    list.innerHTML = html;
+
+    document.getElementById("sched-add-btn").addEventListener("click", function(){ openCourseModal(null); });
+    list.querySelectorAll("[data-edit-course]").forEach(function(el){
+      el.addEventListener("click", function(){
+        var c = state.schedule.find(function(x){ return x.id===el.getAttribute("data-edit-course"); });
+        if(c) openCourseModal(c);
+      });
+    });
+  }
+
+  // ---------- Course modal ----------
+  var currentCourse = null;
+
+  function openCourseModal(course){
+    currentCourse = course ? Object.assign({}, course) : { id:null, day:scheduleDay, subject:"", startTime:"", endTime:"", room:"", teacher:"", color:COURSE_COLORS[0] };
+    renderCourseModal();
+  }
+
+  function renderCourseModal(){
+    var root = document.getElementById("modal-root");
+    var c = currentCourse;
+    var isEdit = !!c.id;
+    var DAYS = ["lundi","mardi","mercredi","jeudi","vendredi"];
+    var DAYS_LABEL = ["Lundi","Mardi","Mercredi","Jeudi","Vendredi"];
+
+    var html = '<div class="overlay" id="course-overlay"><div class="modal">';
+    html += '<div class="modal-header"><h2 class="modal-title">'+(isEdit?"Modifier le cours":"Nouveau cours")+'</h2>';
+    html += '<button class="close-btn" id="course-close"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button></div>';
+    html += '<div class="modal-body">';
+
+    html += '<div class="field"><label class="field-label">Jour</label><div class="opt-grid">';
+    DAYS.forEach(function(d,i){
+      var active = c.day===d;
+      html += '<button type="button" class="opt-btn'+(active?" active":"")+'" data-day-pick="'+d+'" style="'+(active?"background:var(--accent-light);border-color:var(--accent);color:var(--accent-text)":"")+'">'+DAYS_LABEL[i]+'</button>';
+    });
+    html += '</div></div>';
+
+    html += '<div class="field"><label class="field-label">Matière</label><input type="text" id="c-subject" placeholder="Ex. Mathématiques" value="'+esc(c.subject)+'"></div>';
+
+    html += '<div class="field-row">';
+    html += '<div class="field"><label class="field-label">Début</label><input type="time" id="c-start" value="'+esc(c.startTime)+'"></div>';
+    html += '<div class="field"><label class="field-label">Fin</label><input type="time" id="c-end" value="'+esc(c.endTime)+'"></div>';
+    html += '</div>';
+
+    html += '<div class="field-row">';
+    html += '<div class="field"><label class="field-label">Salle (optionnel)</label><input type="text" id="c-room" placeholder="Ex. B12" value="'+esc(c.room)+'"></div>';
+    html += '<div class="field"><label class="field-label">Prof (optionnel)</label><input type="text" id="c-teacher" placeholder="Ex. M. Dupont" value="'+esc(c.teacher)+'"></div>';
+    html += '</div>';
+
+    html += '<div class="field"><label class="field-label">Couleur</label><div class="color-pick-row" id="c-colors">';
+    COURSE_COLORS.forEach(function(col){
+      html += '<button type="button" class="color-pick-dot'+(c.color===col?" active":"")+'" data-color-pick="'+col+'" style="background:'+col+';'+(c.color===col?"border-color:#333;border-width:3px;":"")+'"></button>';
+    });
+    html += '</div></div>';
+
+    html += '</div><div class="modal-footer">';
+    if(isEdit) html += '<button class="danger-btn" id="course-delete"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>Supprimer</button>';
+    else html += '<span></span>';
+    html += '<div class="footer-actions"><button class="secondary-btn" id="course-cancel">Annuler</button>';
+    html += '<button class="primary-btn" id="course-save" '+(c.subject.trim()?'':'disabled style="opacity:0.4"')+'>'+(isEdit?"Enregistrer":"Ajouter")+'</button></div>';
+    html += '</div></div></div>';
+
+    root.innerHTML = html;
+
+    function closeCourseModal(){ root.innerHTML = ""; currentCourse = null; }
+
+    document.getElementById("course-close").addEventListener("click", closeCourseModal);
+    document.getElementById("course-cancel").addEventListener("click", closeCourseModal);
+    document.getElementById("course-overlay").addEventListener("click", function(e){ if(e.target.id==="course-overlay") closeCourseModal(); });
+
+    document.getElementById("c-subject").addEventListener("input", function(e){
+      currentCourse.subject = e.target.value;
+      var btn = document.getElementById("course-save");
+      btn.disabled = !e.target.value.trim(); btn.style.opacity = e.target.value.trim()?"1":"0.4";
+    });
+    document.getElementById("c-start").addEventListener("input", function(e){ currentCourse.startTime = e.target.value; });
+    document.getElementById("c-end").addEventListener("input", function(e){ currentCourse.endTime = e.target.value; });
+    document.getElementById("c-room").addEventListener("input", function(e){ currentCourse.room = e.target.value; });
+    document.getElementById("c-teacher").addEventListener("input", function(e){ currentCourse.teacher = e.target.value; });
+
+    root.querySelectorAll("[data-day-pick]").forEach(function(btn){
+      btn.addEventListener("click", function(){
+        currentCourse.day = btn.getAttribute("data-day-pick");
+        root.querySelectorAll("[data-day-pick]").forEach(function(b){
+          var active = b===btn;
+          b.classList.toggle("active", active);
+          b.style.cssText = active?"background:var(--accent-light);border-color:var(--accent);color:var(--accent-text)":"";
+        });
+      });
+    });
+
+    root.querySelectorAll("[data-color-pick]").forEach(function(btn){
+      btn.addEventListener("click", function(){
+        currentCourse.color = btn.getAttribute("data-color-pick");
+        root.querySelectorAll("[data-color-pick]").forEach(function(b){
+          b.style.borderColor = b===btn?"#333":"transparent";
+          b.style.borderWidth = b===btn?"3px":"2px";
+        });
+      });
+    });
+
+    if(isEdit){
+      document.getElementById("course-delete").addEventListener("click", function(){
+        openConfirmDialog("Supprimer ce cours ?", function(){
+          state.schedule = state.schedule.filter(function(x){ return x.id!==currentCourse.id; });
+          saveState(); closeCourseModal(); renderSchedule();
+        });
+      });
+    }
+    document.getElementById("course-save").addEventListener("click", function(){
+      if(!currentCourse.subject.trim()) return;
+      if(currentCourse.id){
+        state.schedule = state.schedule.map(function(x){ return x.id===currentCourse.id ? Object.assign({},currentCourse) : x; });
+      } else {
+        state.schedule.push(Object.assign({}, currentCourse, { id: uid() }));
+      }
+      scheduleDay = currentCourse.day;
+      saveState(); closeCourseModal(); renderSchedule();
+      document.querySelectorAll("[data-day]").forEach(function(b){
+        b.classList.toggle("active", b.getAttribute("data-day")===scheduleDay);
+      });
+    });
   }
 
   // ---------- Todo post-it ----------
@@ -1230,17 +1404,6 @@
 
     html += '<div class="field"><label class="field-label">Notes (optionnel)</label><textarea id="f-notes" placeholder="Détails supplémentaires...">'+esc(f.notes)+'</textarea></div>';
 
-    if(cat==="college" || cat==="activites"){
-      html += '<div class="field"><label class="field-label">Photo (optionnel)</label>';
-      if(f.photoUrl){
-        html += '<img class="photo-preview" src="'+esc(f.photoUrl)+'" alt="photo">';
-        html += '<button class="photo-remove-btn" id="photo-remove">✕ Supprimer la photo</button>';
-      } else {
-        html += '<div class="photo-upload-zone" id="photo-zone"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg><span>Appuyer pour ajouter une photo</span></div>';
-      }
-      html += '<input type="file" id="photo-input" accept="image/*" style="display:none">';
-      html += '</div>';
-    }
     html += '</div>';
 
     html += '<div class="modal-footer">';
@@ -1269,36 +1432,6 @@
       document.getElementById("cat-activites").style.cssText = "background:var(--accent-light);border-color:var(--accent);color:var(--accent-text)";
       document.getElementById("cat-college").style.cssText = "";
     });
-
-    // Photo listeners
-    var photoInput = document.getElementById("photo-input");
-    var photoZone = document.getElementById("photo-zone");
-    var photoRemove = document.getElementById("photo-remove");
-    if(photoZone){ photoZone.addEventListener("click", function(){ photoInput.click(); }); }
-    if(photoRemove){ photoRemove.addEventListener("click", function(){ currentForm.photoUrl = ""; renderEventModal(); }); }
-    if(photoInput){
-      photoInput.addEventListener("change", function(){
-        var file = photoInput.files[0];
-        if(!file) return;
-        var reader = new FileReader();
-        reader.onload = function(e){
-          var img = new Image();
-          img.onload = function(){
-            var canvas = document.createElement("canvas");
-            var max = 600;
-            var w = img.width, h = img.height;
-            if(w > h){ if(w > max){ h = Math.round(h*max/w); w = max; } }
-            else { if(h > max){ w = Math.round(w*max/h); h = max; } }
-            canvas.width = w; canvas.height = h;
-            canvas.getContext("2d").drawImage(img, 0, 0, w, h);
-            currentForm.photoUrl = canvas.toDataURL("image/jpeg", 0.70);
-            renderEventModal();
-          };
-          img.src = e.target.result;
-        };
-        reader.readAsDataURL(file);
-      });
-    }
 
     document.getElementById("f-title").addEventListener("input", function(e){ currentForm.title = e.target.value; updateSaveState(); });
     document.getElementById("f-date").addEventListener("input", function(e){ currentForm.date = e.target.value; updateSaveState(); });
@@ -1559,6 +1692,15 @@
 
   document.getElementById("cat-add-fab").addEventListener("click", function(){
     openEventModal(null, null, null);
+  });
+
+  // Onglets jours emploi du temps
+  document.querySelectorAll("[data-day]").forEach(function(btn){
+    btn.addEventListener("click", function(){
+      scheduleDay = btn.getAttribute("data-day");
+      document.querySelectorAll("[data-day]").forEach(function(b){ b.classList.toggle("active", b===btn); });
+      renderSchedule();
+    });
   });
 
   // ---------- Top-level listeners ----------
