@@ -179,9 +179,26 @@
     display:flex;align-items:center;justify-content:center; flex-shrink:0; opacity:0.7;
   }
 
+  .kid-tabs{
+    display:flex; gap:0; margin:4px 10px 0;
+    border-radius:8px 8px 0 0; overflow:hidden;
+  }
+  .kid-tab{
+    flex:1; padding:6px 4px; font-size:10px; font-weight:800; border:none;
+    background:rgba(255,255,255,0.25); color:inherit; opacity:0.65;
+    cursor:pointer; text-align:center; transition:background 0.15s, opacity 0.15s;
+    line-height:1.2;
+  }
+  .kid-tab.active{
+    background:rgba(255,255,255,0.6); opacity:1;
+    border-bottom:2px solid rgba(0,0,0,0.18);
+  }
+  .kid-tab:first-child{ border-radius:8px 0 0 0; }
+  .kid-tab:last-child{ border-radius:0 8px 0 0; }
+
   .kid-postit{
-    margin:6px 10px 12px;
-    border-radius:8px;
+    margin:0 10px 12px;
+    border-radius:0 0 8px 8px;
     padding:10px 10px 11px;
     min-height:110px;
     display:flex; flex-direction:column; gap:7px;
@@ -587,6 +604,7 @@
 
   // ---------- State ----------
   var state = { events:[], members: DEFAULT_KIDS.slice(), notes:[] };
+  var kidTabState = {}; // kidId -> "college" | "activites"
   var miniCalCursor = (function(){ var d=new Date(); return new Date(d.getFullYear(), d.getMonth(), 1); })();
   var db = null;
   var docRef = null;
@@ -703,8 +721,9 @@
 
     state.members.forEach(function(m){
       var c = getKidColor(m.color);
+      var activeTab = kidTabState[m.id] || "college";
       var upcoming = state.events
-        .filter(function(e){ return e.memberIds.indexOf(m.id)!==-1 && e.date >= today; })
+        .filter(function(e){ return e.memberIds.indexOf(m.id)!==-1 && e.date >= today && (e.category||"college")===activeTab; })
         .sort(function(a,b){
           var da = a.date+" "+(a.time||"99:99");
           var db = b.date+" "+(b.time||"99:99");
@@ -720,6 +739,11 @@
       headerHTML += '<div class="kid-card-name"><span class="kid-card-avatar" style="background:'+c.dot+'">'+esc(m.name.charAt(0).toUpperCase())+'</span><span>'+esc(m.name)+'</span></div>';
       headerHTML += '<button class="kid-card-edit" data-edit-kid="'+m.id+'" style="color:'+c.text+'" aria-label="Modifier"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.12 2.12 0 0 1 3 3L12 15l-4 1 1-4Z"/></svg></button>';
       headerHTML += '</div>';
+
+      var tabsHTML = '<div class="kid-tabs">'
+        + '<button class="kid-tab'+(activeTab==="college"?" active":"")+'" data-tab-kid="'+m.id+'" data-tab="college">🎒 Collège</button>'
+        + '<button class="kid-tab'+(activeTab==="activites"?" active":"")+'" data-tab-kid="'+m.id+'" data-tab="activites">⭐ Activités</button>'
+        + '</div>';
 
       var postitHTML = '<div class="kid-postit" data-add-for="'+m.id+'" style="color:'+c.text+'">';
       if(upcoming.length===0){
@@ -741,8 +765,18 @@
       }
       postitHTML += '</div>';
 
-      card.innerHTML = headerHTML + postitHTML;
+      card.innerHTML = headerHTML + tabsHTML + postitHTML;
       wrap.appendChild(card);
+    });
+
+    // Tab listeners
+    wrap.querySelectorAll("[data-tab-kid]").forEach(function(btn){
+      btn.addEventListener("click", function(e){
+        e.stopPropagation();
+        var kidId = btn.getAttribute("data-tab-kid");
+        kidTabState[kidId] = btn.getAttribute("data-tab");
+        renderKidsRow();
+      });
     });
 
     // Listeners
@@ -913,7 +947,8 @@
   function openEventModal(ev, presetKidId, dateForNew){
     currentForm = ev ? Object.assign({}, ev, { memberIds: ev.memberIds.slice() }) : {
       id:null, title:"", date: dateForNew || todayISO(),
-      time:"", location:"", memberIds: presetKidId ? [presetKidId] : [], notes:""
+      time:"", location:"", memberIds: presetKidId ? [presetKidId] : [], notes:"",
+      category: (presetKidId ? (kidTabState[presetKidId] || "college") : "college")
     };
     renderEventModal();
   }
@@ -936,6 +971,12 @@
       var style = active ? ('background:'+c.bg+';border-color:'+c.dot+';color:'+c.text) : '';
       html += '<button type="button" class="opt-btn'+(active?" active":"")+'" data-member="'+m.id+'" style="'+style+'">'+esc(m.name)+'</button>';
     });
+    html += '</div></div>';
+
+    var cat = f.category || "college";
+    html += '<div class="field"><label class="field-label">Catégorie</label><div class="opt-grid">';
+    html += '<button type="button" class="opt-btn'+(cat==="college"?" active":"")+'" id="cat-college" style="'+(cat==="college"?"background:var(--accent-light);border-color:var(--accent);color:var(--accent-text)":"")+'">🎒 Collège</button>';
+    html += '<button type="button" class="opt-btn'+(cat==="activites"?" active":"")+'" id="cat-activites" style="'+(cat==="activites"?"background:var(--accent-light);border-color:var(--accent);color:var(--accent-text)":"")+'">⭐ Activités extrascolaires</button>';
     html += '</div></div>';
 
     html += '<div class="field"><label class="field-label">Titre</label><input type="text" id="f-title" placeholder="Ex. Rendez-vous dentiste" value="'+esc(f.title)+'"></div>';
@@ -965,6 +1006,17 @@
     document.getElementById("ev-close").addEventListener("click", closeEventModal);
     document.getElementById("ev-cancel").addEventListener("click", closeEventModal);
     document.getElementById("ev-overlay").addEventListener("click", function(e){ if(e.target.id==="ev-overlay") closeEventModal(); });
+
+    document.getElementById("cat-college").addEventListener("click", function(){
+      currentForm.category = "college";
+      document.getElementById("cat-college").style.cssText = "background:var(--accent-light);border-color:var(--accent);color:var(--accent-text)";
+      document.getElementById("cat-activites").style.cssText = "";
+    });
+    document.getElementById("cat-activites").addEventListener("click", function(){
+      currentForm.category = "activites";
+      document.getElementById("cat-activites").style.cssText = "background:var(--accent-light);border-color:var(--accent);color:var(--accent-text)";
+      document.getElementById("cat-college").style.cssText = "";
+    });
 
     document.getElementById("f-title").addEventListener("input", function(e){ currentForm.title = e.target.value; updateSaveState(); });
     document.getElementById("f-date").addEventListener("input", function(e){ currentForm.date = e.target.value; updateSaveState(); });
