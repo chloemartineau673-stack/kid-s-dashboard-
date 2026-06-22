@@ -179,23 +179,43 @@
     display:flex;align-items:center;justify-content:center; flex-shrink:0; opacity:0.7;
   }
 
-  /* ---------- Global tabs ---------- */
+  /* ---------- Section tabs ---------- */
+  .section-tabs-block{
+    border-radius:14px; border:1.5px solid var(--border); background:var(--surface);
+    overflow:hidden; margin-bottom:18px;
+    box-shadow:0 2px 6px rgba(40,35,20,0.08);
+  }
   .global-tabs{
     display:flex; gap:0;
-    background:var(--surface);
     border-bottom:1.5px solid var(--border);
-    padding:0 14px;
   }
   .global-tab{
-    flex:1; padding:11px 6px 9px; font-size:13px; font-weight:800; border:none;
+    flex:1; padding:12px 6px 10px; font-size:13px; font-weight:800; border:none;
     background:transparent; color:var(--text-tertiary);
     cursor:pointer; text-align:center; border-bottom:2.5px solid transparent;
     transition:color 0.15s, border-color 0.15s;
     display:flex; align-items:center; justify-content:center; gap:5px;
+    margin-bottom:-1.5px;
   }
-  .global-tab.active{
-    color:var(--accent); border-bottom-color:var(--accent);
+  .global-tab.active{ color:var(--accent); border-bottom-color:var(--accent); }
+  .tab-content{ padding:12px; display:flex; flex-direction:column; gap:8px; min-height:80px; }
+  .tab-event-item{
+    display:flex; align-items:center; gap:10px;
+    background:var(--surface-2); border-radius:10px; padding:9px 11px;
+    cursor:pointer;
   }
+  .tab-event-dot{ width:8px; height:8px; border-radius:50%; flex-shrink:0; }
+  .tab-event-info{ flex:1; }
+  .tab-event-title{ font-size:13px; font-weight:800; }
+  .tab-event-meta{ font-size:11px; color:var(--text-tertiary); margin-top:2px; }
+  .tab-empty{ font-size:12.5px; color:var(--text-tertiary); text-align:center; padding:18px 0; }
+  .tab-add-btn{
+    display:flex; align-items:center; justify-content:center; gap:7px;
+    padding:10px; border-radius:10px; border:1.5px dashed var(--border-strong);
+    background:transparent; color:var(--text-secondary); font-size:13px; font-weight:700;
+    cursor:pointer; width:100%;
+  }
+  .tab-add-btn:hover{ background:var(--surface-2); }
 
   .kid-postit{
     margin:6px 10px 12px;
@@ -513,13 +533,17 @@
   </div>
 </div>
 
-<div class="global-tabs" id="global-tabs">
-  <button class="global-tab active" data-global-tab="college">🎒 Collège</button>
-  <button class="global-tab" data-global-tab="activites">⭐ Activités extrascolaires</button>
-</div>
-
 <main>
   <div class="kids-row" id="kids-row"></div>
+
+  <div class="section-tabs-block">
+    <div class="global-tabs" id="global-tabs">
+      <button class="global-tab active" data-global-tab="college">🎒 Collège</button>
+      <button class="global-tab" data-global-tab="activites">⭐ Activités extrascolaires</button>
+    </div>
+    <div class="tab-content" id="tab-content"></div>
+  </div>
+
   <div class="bottom-row">
     <div class="mini-cal-card" id="mini-cal-card"></div>
     <div class="notes-card" id="notes-card"></div>
@@ -714,8 +738,50 @@
   // ---------- Render: everything ----------
   function renderAll(){
     renderKidsRow();
+    renderTabContent();
     renderMiniCalendar();
     renderNotes();
+  }
+
+  // ---------- Tab content ----------
+  function renderTabContent(){
+    var wrap = document.getElementById("tab-content");
+    if(!wrap) return;
+    var today = todayISO();
+    var filtered = state.events
+      .filter(function(e){ return (e.category||"college")===activeGlobalTab && e.date >= today; })
+      .sort(function(a,b){ return (a.date+" "+(a.time||"99:99")).localeCompare(b.date+" "+(b.time||"99:99")); });
+
+    var html = "";
+    if(filtered.length===0){
+      html += '<div class="tab-empty">Aucun élément pour le moment.</div>';
+    } else {
+      filtered.forEach(function(ev){
+        var members = state.members.filter(function(m){ return ev.memberIds.indexOf(m.id)!==-1; });
+        var dotColor = members.length ? getKidColor(members[0].color).hex : "#aaa";
+        var metaParts = [formatDateShort(ev.date)];
+        if(ev.time) metaParts.push(ev.time);
+        if(ev.location) metaParts.push(ev.location);
+        if(members.length) metaParts.push(members.map(function(m){ return m.name; }).join(", "));
+        html += '<div class="tab-event-item" data-tab-edit-event="'+ev.id+'">';
+        html += '<div class="tab-event-dot" style="background:'+dotColor+'"></div>';
+        html += '<div class="tab-event-info"><div class="tab-event-title">'+esc(ev.title)+'</div>';
+        html += '<div class="tab-event-meta">'+esc(metaParts.join(" · "))+'</div></div></div>';
+      });
+    }
+    html += '<button class="tab-add-btn" id="tab-add-btn"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Ajouter dans '+(activeGlobalTab==="college"?"Collège":"Activités extrascolaires")+'</button>';
+
+    wrap.innerHTML = html;
+
+    document.getElementById("tab-add-btn").addEventListener("click", function(){
+      openEventModal(null, null, null);
+    });
+    wrap.querySelectorAll("[data-tab-edit-event]").forEach(function(el){
+      el.addEventListener("click", function(){
+        var ev = state.events.find(function(x){ return x.id===el.getAttribute("data-tab-edit-event"); });
+        if(ev) openEventModal(ev, null, null);
+      });
+    });
   }
 
   // ---------- Kid columns ----------
@@ -728,7 +794,7 @@
     state.members.forEach(function(m){
       var c = getKidColor(m.color);
       var upcoming = state.events
-        .filter(function(e){ return e.memberIds.indexOf(m.id)!==-1 && e.date >= today && (e.category||"college")===activeGlobalTab; })
+        .filter(function(e){ return e.memberIds.indexOf(m.id)!==-1 && e.date >= today; })
         .sort(function(a,b){
           var da = a.date+" "+(a.time||"99:99");
           var db = b.date+" "+(b.time||"99:99");
@@ -1260,7 +1326,7 @@
       document.querySelectorAll("[data-global-tab]").forEach(function(b){
         b.classList.toggle("active", b === btn);
       });
-      renderKidsRow();
+      renderTabContent();
     });
   });
 
