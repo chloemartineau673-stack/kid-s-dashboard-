@@ -1286,41 +1286,61 @@
       return out;
     }).join("");
 
-    // Listeners répondre
+    // Listeners répondre — recréés à chaque render mais c'est ok car wrap est recréé
     wrap.querySelectorAll(".chat-reply-btn").forEach(function(btn){
-      btn.addEventListener("click", function(){
-        replyTo = { id: btn.getAttribute("data-reply-id"), text: btn.getAttribute("data-reply-text") };
-        var bar = document.getElementById("chat-reply-bar");
-        var barText = document.getElementById("chat-reply-bar-text");
-        barText.textContent = "↩ "+replyTo.text.slice(0,60);
-        bar.classList.remove("hidden");
-        document.getElementById("chat-input").focus();
+      btn.addEventListener("click", function(e){
+        e.stopPropagation();
+        var id = btn.getAttribute("data-reply-id");
+        var text = btn.getAttribute("data-reply-text");
+        setReplyTo(id, text);
       });
     });
 
     if(chatOpen) wrap.scrollTop = wrap.scrollHeight;
   }
 
+  function setReplyTo(id, text){
+    replyTo = { id: id, text: text };
+    var bar = document.getElementById("chat-reply-bar");
+    var barText = document.getElementById("chat-reply-bar-text");
+    if(bar && barText){
+      barText.textContent = "↩ " + text.slice(0, 60);
+      bar.classList.remove("hidden");
+    }
+    var input = document.getElementById("chat-input");
+    if(input) input.focus();
+  }
+
+  function clearReplyTo(){
+    replyTo = null;
+    var bar = document.getElementById("chat-reply-bar");
+    if(bar) bar.classList.add("hidden");
+    var barText = document.getElementById("chat-reply-bar-text");
+    if(barText) barText.textContent = "";
+  }
+
   function doSendMessage(){
     var input = document.getElementById("chat-input");
     var text = (input.value||"").trim();
     if(!chatRef || !text) return;
-    var msg = { text:text, ts:Date.now(), deviceId:getDeviceId() };
-    if(replyTo) msg.replyTo = { id:replyTo.id, text:replyTo.text };
+    // Capture replyTo avant de le réinitialiser
+    var currentReply = replyTo ? { id: replyTo.id, text: replyTo.text } : null;
+    var msg = { text: text, ts: Date.now(), deviceId: getDeviceId() };
+    if(currentReply) msg.replyTo = currentReply;
+    // Vide immédiatement l'UI
+    input.value = "";
+    clearReplyTo();
     chatRef.add(msg).then(function(){
-      input.value = "";
-      replyTo = null;
-      var bar = document.getElementById("chat-reply-bar");
-      if(bar) bar.classList.add("hidden");
       var wrap = document.getElementById("chat-messages");
       if(wrap) setTimeout(function(){ wrap.scrollTop = wrap.scrollHeight; }, 100);
     }).catch(function(err){ console.error("send error", err); });
   }
 
+  // Listener cancel reply — attaché une seule fois, stable
   document.getElementById("chat-reply-cancel").addEventListener("click", function(){
-    replyTo = null;
-    document.getElementById("chat-reply-bar").classList.add("hidden");
-    document.getElementById("chat-input").focus();
+    clearReplyTo();
+    var input = document.getElementById("chat-input");
+    if(input) input.focus();
   });
 
   document.getElementById("chat-fab").addEventListener("click", function(){
