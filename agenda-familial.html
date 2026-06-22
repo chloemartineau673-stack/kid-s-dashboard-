@@ -1282,23 +1282,17 @@
         if(!file) return;
         var reader = new FileReader();
         reader.onload = function(e){
-          // Compresse via canvas avant upload
           var img = new Image();
           img.onload = function(){
             var canvas = document.createElement("canvas");
-            var max = 800;
+            var max = 600;
             var w = img.width, h = img.height;
-            if(w > max){ h = Math.round(h*max/w); w = max; }
+            if(w > h){ if(w > max){ h = Math.round(h*max/w); w = max; } }
+            else { if(h > max){ w = Math.round(w*max/h); h = max; } }
             canvas.width = w; canvas.height = h;
             canvas.getContext("2d").drawImage(img, 0, 0, w, h);
-            canvas.toBlob(function(blob){
-              var storage = firebase.storage();
-              var ref = storage.ref("photos/" + uid() + ".jpg");
-              ref.put(blob).then(function(snap){ return snap.ref.getDownloadURL(); }).then(function(url){
-                currentForm.photoUrl = url;
-                renderEventModal();
-              }).catch(function(){ alert("Erreur lors de l'envoi de la photo."); });
-            }, "image/jpeg", 0.82);
+            currentForm.photoUrl = canvas.toDataURL("image/jpeg", 0.70);
+            renderEventModal();
           };
           img.src = e.target.result;
         };
