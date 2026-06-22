@@ -132,7 +132,7 @@
   .sync-dot.offline{ background:#F0B05A; }
 
   /* ---------- Main layout ---------- */
-  main{ padding:16px 14px 28px; }
+  main{ padding:16px 14px 90px; }
 
   .kids-row{
     display:grid; grid-template-columns:1fr 1fr; gap:18px;
@@ -179,43 +179,55 @@
     display:flex;align-items:center;justify-content:center; flex-shrink:0; opacity:0.7;
   }
 
-  /* ---------- Section tabs ---------- */
-  .section-tabs-block{
-    border-radius:14px; border:1.5px solid var(--border); background:var(--surface);
-    overflow:hidden; margin-bottom:18px;
-    box-shadow:0 2px 6px rgba(40,35,20,0.08);
+  /* ---------- Bottom navigation ---------- */
+  .bottom-nav{
+    position:fixed; bottom:0; left:0; right:0; z-index:30;
+    background:var(--surface);
+    border-top:1.5px solid var(--border);
+    display:flex;
+    padding-bottom:env(safe-area-inset-bottom);
   }
-  .global-tabs{
-    display:flex; gap:0;
-    border-bottom:1.5px solid var(--border);
+  .nav-btn{
+    flex:1; padding:10px 4px 8px; border:none; background:transparent;
+    color:var(--text-tertiary); font-size:10px; font-weight:700;
+    display:flex; flex-direction:column; align-items:center; gap:3px;
+    cursor:pointer; transition:color 0.15s;
   }
-  .global-tab{
-    flex:1; padding:12px 6px 10px; font-size:13px; font-weight:800; border:none;
-    background:transparent; color:var(--text-tertiary);
-    cursor:pointer; text-align:center; border-bottom:2.5px solid transparent;
-    transition:color 0.15s, border-color 0.15s;
-    display:flex; align-items:center; justify-content:center; gap:5px;
-    margin-bottom:-1.5px;
+  .nav-btn.active{ color:var(--accent); }
+  .nav-btn svg{ flex-shrink:0; }
+
+  /* ---------- Pages ---------- */
+  .page{ display:none; }
+  .page.active{ display:block; }
+
+  /* ---------- Category page ---------- */
+  .cat-page-header{
+    display:flex; align-items:center; justify-content:space-between;
+    padding:16px 14px 8px;
   }
-  .global-tab.active{ color:var(--accent); border-bottom-color:var(--accent); }
-  .tab-content{ padding:12px; display:flex; flex-direction:column; gap:8px; min-height:80px; }
-  .tab-event-item{
-    display:flex; align-items:center; gap:10px;
-    background:var(--surface-2); border-radius:10px; padding:9px 11px;
+  .cat-page-title{ font-size:18px; font-weight:900; }
+  .cat-item{
+    display:flex; align-items:center; gap:12px;
+    background:var(--surface); border-radius:12px; padding:12px 14px;
+    margin:0 14px 10px; border:1.5px solid var(--border);
     cursor:pointer;
   }
-  .tab-event-dot{ width:8px; height:8px; border-radius:50%; flex-shrink:0; }
-  .tab-event-info{ flex:1; }
-  .tab-event-title{ font-size:13px; font-weight:800; }
-  .tab-event-meta{ font-size:11px; color:var(--text-tertiary); margin-top:2px; }
-  .tab-empty{ font-size:12.5px; color:var(--text-tertiary); text-align:center; padding:18px 0; }
-  .tab-add-btn{
-    display:flex; align-items:center; justify-content:center; gap:7px;
-    padding:10px; border-radius:10px; border:1.5px dashed var(--border-strong);
-    background:transparent; color:var(--text-secondary); font-size:13px; font-weight:700;
-    cursor:pointer; width:100%;
+  .cat-item-dot{ width:10px; height:10px; border-radius:50%; flex-shrink:0; }
+  .cat-item-info{ flex:1; }
+  .cat-item-title{ font-size:14px; font-weight:800; }
+  .cat-item-meta{ font-size:11.5px; color:var(--text-tertiary); margin-top:3px; }
+  .cat-empty{
+    text-align:center; color:var(--text-tertiary); font-size:13px;
+    padding:40px 20px;
   }
-  .tab-add-btn:hover{ background:var(--surface-2); }
+  .cat-add-fab{
+    position:fixed; right:18px; bottom:calc(env(safe-area-inset-bottom) + 70px); z-index:25;
+    width:52px; height:52px; border-radius:50%;
+    background:var(--accent); color:#fff; border:none;
+    display:flex; align-items:center; justify-content:center;
+    box-shadow:0 4px 14px rgba(123,111,245,0.45);
+  }
+  .cat-add-fab.hidden{ display:none; }
 
   .kid-postit{
     margin:6px 10px 12px;
@@ -533,22 +545,53 @@
   </div>
 </div>
 
-<main>
-  <div class="kids-row" id="kids-row"></div>
-
-  <div class="section-tabs-block">
-    <div class="global-tabs" id="global-tabs">
-      <button class="global-tab active" data-global-tab="college">🎒 Collège</button>
-      <button class="global-tab" data-global-tab="activites">⭐ Activités extrascolaires</button>
+<!-- Page accueil -->
+<div class="page active" id="page-home">
+  <main>
+    <div class="kids-row" id="kids-row"></div>
+    <div class="bottom-row">
+      <div class="mini-cal-card" id="mini-cal-card"></div>
+      <div class="notes-card" id="notes-card"></div>
     </div>
-    <div class="tab-content" id="tab-content"></div>
-  </div>
+  </main>
+</div>
 
-  <div class="bottom-row">
-    <div class="mini-cal-card" id="mini-cal-card"></div>
-    <div class="notes-card" id="notes-card"></div>
+<!-- Page Collège -->
+<div class="page" id="page-college">
+  <div class="cat-page-header">
+    <span class="cat-page-title">🎒 Collège</span>
   </div>
-</main>
+  <div id="cat-college-list"></div>
+</div>
+
+<!-- Page Activités -->
+<div class="page" id="page-activites">
+  <div class="cat-page-header">
+    <span class="cat-page-title">⭐ Activités extrascolaires</span>
+  </div>
+  <div id="cat-activites-list"></div>
+</div>
+
+<!-- Bouton ajouter flottant pour pages catégorie -->
+<button class="cat-add-fab hidden" id="cat-add-fab" aria-label="Ajouter">
+  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+</button>
+
+<!-- Barre de navigation -->
+<nav class="bottom-nav">
+  <button class="nav-btn active" data-nav="home">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+    Accueil
+  </button>
+  <button class="nav-btn" data-nav="college">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg>
+    Collège
+  </button>
+  <button class="nav-btn" data-nav="activites">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+    Activités
+  </button>
+</nav>
 
 <div class="chat-panel hidden" id="chat-panel">
   <div class="chat-panel-header">
@@ -634,7 +677,7 @@
 
   // ---------- State ----------
   var state = { events:[], members: DEFAULT_KIDS.slice(), notes:[] };
-  var activeGlobalTab = "college"; // "college" | "activites"
+  var activePage = "home"; // "home" | "college" | "activites"
   var miniCalCursor = (function(){ var d=new Date(); return new Date(d.getFullYear(), d.getMonth(), 1); })();
   var db = null;
   var docRef = null;
@@ -738,23 +781,24 @@
   // ---------- Render: everything ----------
   function renderAll(){
     renderKidsRow();
-    renderTabContent();
     renderMiniCalendar();
     renderNotes();
+    renderCategoryPage("college");
+    renderCategoryPage("activites");
   }
 
-  // ---------- Tab content ----------
-  function renderTabContent(){
-    var wrap = document.getElementById("tab-content");
+  // ---------- Category pages ----------
+  function renderCategoryPage(cat){
+    var wrap = document.getElementById("cat-"+cat+"-list");
     if(!wrap) return;
     var today = todayISO();
     var filtered = state.events
-      .filter(function(e){ return (e.category||"college")===activeGlobalTab && e.date >= today; })
+      .filter(function(e){ return (e.category||"home")===cat && e.date >= today; })
       .sort(function(a,b){ return (a.date+" "+(a.time||"99:99")).localeCompare(b.date+" "+(b.time||"99:99")); });
 
     var html = "";
     if(filtered.length===0){
-      html += '<div class="tab-empty">Aucun élément pour le moment.</div>';
+      html = '<div class="cat-empty">Aucun élément.<br>Appuyez sur + pour ajouter.</div>';
     } else {
       filtered.forEach(function(ev){
         var members = state.members.filter(function(m){ return ev.memberIds.indexOf(m.id)!==-1; });
@@ -763,22 +807,17 @@
         if(ev.time) metaParts.push(ev.time);
         if(ev.location) metaParts.push(ev.location);
         if(members.length) metaParts.push(members.map(function(m){ return m.name; }).join(", "));
-        html += '<div class="tab-event-item" data-tab-edit-event="'+ev.id+'">';
-        html += '<div class="tab-event-dot" style="background:'+dotColor+'"></div>';
-        html += '<div class="tab-event-info"><div class="tab-event-title">'+esc(ev.title)+'</div>';
-        html += '<div class="tab-event-meta">'+esc(metaParts.join(" · "))+'</div></div></div>';
+        html += '<div class="cat-item" data-cat-edit="'+ev.id+'">';
+        html += '<div class="cat-item-dot" style="background:'+dotColor+'"></div>';
+        html += '<div class="cat-item-info"><div class="cat-item-title">'+esc(ev.title)+'</div>';
+        html += '<div class="cat-item-meta">'+esc(metaParts.join(" · "))+'</div></div></div>';
       });
     }
-    html += '<button class="tab-add-btn" id="tab-add-btn"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Ajouter dans '+(activeGlobalTab==="college"?"Collège":"Activités extrascolaires")+'</button>';
-
     wrap.innerHTML = html;
 
-    document.getElementById("tab-add-btn").addEventListener("click", function(){
-      openEventModal(null, null, null);
-    });
-    wrap.querySelectorAll("[data-tab-edit-event]").forEach(function(el){
+    wrap.querySelectorAll("[data-cat-edit]").forEach(function(el){
       el.addEventListener("click", function(){
-        var ev = state.events.find(function(x){ return x.id===el.getAttribute("data-tab-edit-event"); });
+        var ev = state.events.find(function(x){ return x.id===el.getAttribute("data-cat-edit"); });
         if(ev) openEventModal(ev, null, null);
       });
     });
@@ -1004,7 +1043,7 @@
     currentForm = ev ? Object.assign({}, ev, { memberIds: ev.memberIds.slice() }) : {
       id:null, title:"", date: dateForNew || todayISO(),
       time:"", location:"", memberIds: presetKidId ? [presetKidId] : [], notes:"",
-      category: activeGlobalTab
+      category: (activePage==="home" ? "home" : activePage)
     };
     renderEventModal();
   }
@@ -1319,15 +1358,20 @@
     document.getElementById("modal-root").innerHTML = "";
   }
 
-  // ---------- Global tabs ----------
-  document.querySelectorAll("[data-global-tab]").forEach(function(btn){
+  // ---------- Navigation ----------
+  document.querySelectorAll("[data-nav]").forEach(function(btn){
     btn.addEventListener("click", function(){
-      activeGlobalTab = btn.getAttribute("data-global-tab");
-      document.querySelectorAll("[data-global-tab]").forEach(function(b){
-        b.classList.toggle("active", b === btn);
-      });
-      renderTabContent();
+      activePage = btn.getAttribute("data-nav");
+      document.querySelectorAll("[data-nav]").forEach(function(b){ b.classList.toggle("active", b===btn); });
+      document.querySelectorAll(".page").forEach(function(p){ p.classList.remove("active"); });
+      document.getElementById("page-"+activePage).classList.add("active");
+      var fab = document.getElementById("cat-add-fab");
+      fab.classList.toggle("hidden", activePage==="home");
     });
+  });
+
+  document.getElementById("cat-add-fab").addEventListener("click", function(){
+    openEventModal(null, null, null);
   });
 
   // ---------- Top-level listeners ----------
