@@ -37,11 +37,11 @@
     --shadow-postit:0 8px 18px rgba(60,40,160,0.18), 0 2px 5px rgba(60,40,160,0.10);
   }
   body.dark{
-    --bg:#13111F;
-    --surface:#1E1B30;
-    --surface-2:#28243E;
-    --border:#3A355A;
-    --border-strong:#504A7A;
+    --bg:#0F0E1A;
+    --surface:#1A1830;
+    --surface-2:#232040;
+    --border:#2E2A50;
+    --border-strong:#3D3870;
     --text:#EDE9FF;
     --text-secondary:#B8B0E8;
     --text-tertiary:#6E68A0;
@@ -51,12 +51,12 @@
     --danger:#E05A5A;
     --danger-bg:#3A1A1A;
     --danger-border:#8A3A3A;
-    --nina-dot:#A78BFA; --nina-bg:#2D2060; --nina-border:#7B6FD0; --nina-text:#C4BAFF;
-    --ilhan-dot:#FDE047; --ilhan-bg:#3A3000; --ilhan-border:#A88C00; --ilhan-text:#FDE047;
-    --notes-dot:#34EE9A; --notes-bg:#003A20; --notes-border:#1A8A50; --notes-text:#34EE9A;
-    --chat-bg:#0A2030; --chat-border:#1A5A80; --chat-text:#7DD3FC;
-    --shadow-modal:0 12px 32px rgba(0,0,0,0.55);
-    --shadow-postit:0 8px 22px rgba(0,0,0,0.45), 0 2px 5px rgba(0,0,0,0.25);
+    --nina-dot:#A78BFA; --nina-bg:#DDD5FF; --nina-border:#A78BFA; --nina-text:#3B1FA8;
+    --ilhan-dot:#FDE047; --ilhan-bg:#FEF686; --ilhan-border:#EAC80A; --ilhan-text:#6B4E0A;
+    --notes-dot:#34EE9A; --notes-bg:#AAFAD8; --notes-border:#1ED97A; --notes-text:#065A2E;
+    --chat-bg:#E0F2FF; --chat-border:#7DD3FC; --chat-text:#0C3A5C;
+    --shadow-modal:0 12px 32px rgba(0,0,0,0.65);
+    --shadow-postit:0 8px 22px rgba(0,0,0,0.55), 0 2px 5px rgba(0,0,0,0.35);
   }
   *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
   html,body{margin:0;padding:0;}
@@ -370,8 +370,16 @@
   .chat-time{ font-size:10px; color:var(--text-tertiary); margin-top:3px; padding:0 3px; }
   .chat-empty{ text-align:center; color:var(--text-tertiary); font-size:13px; padding:20px 0; }
   .chat-input-row{
-    display:flex; gap:8px; padding:10px 12px; border-top:1px solid var(--border); flex-shrink:0;
+    display:flex; flex-direction:column; gap:6px; padding:8px 12px 10px; border-top:1px solid var(--border); flex-shrink:0;
   }
+  .chat-reply-bar{
+    display:flex; align-items:center; justify-content:space-between; gap:8px;
+    background:var(--surface-2); border-radius:10px; padding:5px 10px;
+    border-left:3px solid var(--accent);
+  }
+  .chat-reply-bar-text{ font-size:11.5px; color:var(--text-secondary); flex:1; overflow:hidden; white-space:nowrap; text-overflow:ellipsis; }
+  .chat-reply-bar-cancel{ background:none; border:none; color:var(--text-tertiary); display:flex; padding:0; }
+  .chat-input-controls{ display:flex; gap:8px; }
   .chat-input{
     flex:1; height:38px; padding:0 11px; font-size:13.5px; border-radius:20px;
     border:1.5px solid var(--border-strong); background:var(--surface-2); color:var(--text);
@@ -381,6 +389,24 @@
     width:38px;height:38px;border-radius:50%;background:var(--accent);color:#fff;border:none;
     display:flex;align-items:center;justify-content:center; flex-shrink:0;
   }
+  .chat-msg-wrap{ display:flex; flex-direction:column; max-width:85%; }
+  .chat-msg-wrap.mine{ align-self:flex-end; align-items:flex-end; }
+  .chat-msg-wrap.theirs{ align-self:flex-start; align-items:flex-start; }
+  .chat-quoted{
+    background:var(--surface-2); border-radius:10px 10px 0 0; padding:5px 10px;
+    border-left:3px solid var(--accent); font-size:11px; color:var(--text-secondary);
+    max-width:100%; overflow:hidden; white-space:nowrap; text-overflow:ellipsis;
+    margin-bottom:-2px;
+  }
+  .chat-bubble{ padding:8px 11px; border-radius:14px; font-size:13px; line-height:1.4; word-break:break-word; }
+  .chat-msg-wrap.mine .chat-bubble{ background:var(--accent); color:#fff; border-bottom-right-radius:4px; }
+  .chat-msg-wrap.theirs .chat-bubble{ background:var(--surface-2); color:var(--text); border-bottom-left-radius:4px; }
+  .chat-msg-wrap.mine .chat-quoted{ align-self:flex-end; border-left:none; border-right:3px solid rgba(255,255,255,0.5); text-align:right; }
+  .chat-meta{ display:flex; align-items:center; gap:6px; margin-top:3px; padding:0 3px; }
+  .chat-time{ font-size:10px; color:var(--text-tertiary); }
+  .chat-reply-btn{ background:none; border:none; padding:2px 4px; border-radius:5px; color:var(--text-tertiary); display:flex; align-items:center; gap:3px; font-size:10px; cursor:pointer; }
+  .chat-reply-btn:hover{ background:var(--surface-2); color:var(--text-secondary); }
+  .chat-empty{ text-align:center; color:var(--text-tertiary); font-size:13px; padding:20px 0; }
   .chat-panel.hidden{ display:none; }
 
   /* ---------- Lock / login screen ---------- */
@@ -459,10 +485,18 @@
   </div>
   <div class="chat-messages" id="chat-messages"></div>
   <div class="chat-input-row">
-    <input type="text" class="chat-input" id="chat-input" placeholder="Écris un message..." maxlength="500">
-    <button class="chat-send-btn" id="chat-send-btn" aria-label="Envoyer">
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
-    </button>
+    <div class="chat-reply-bar hidden" id="chat-reply-bar">
+      <span class="chat-reply-bar-text" id="chat-reply-bar-text"></span>
+      <button class="chat-reply-bar-cancel" id="chat-reply-cancel" aria-label="Annuler la réponse">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div class="chat-input-controls">
+      <input type="text" class="chat-input" id="chat-input" placeholder="Écris un message..." maxlength="500">
+      <button class="chat-send-btn" id="chat-send-btn" aria-label="Envoyer">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+      </button>
+    </div>
   </div>
 </div>
 
@@ -756,20 +790,28 @@
       var dayEvents = byDate[iso] || [];
       var isToday = iso===today;
       html += '<div class="mini-day-cell'+(cell.inMonth?"":" muted")+'">';
-      html += '<span class="mini-day-num'+(isToday?" today":"")+'">'+cell.date.getDate()+'</span>';
-      if(dayEvents.length>0 && cell.inMonth){
-        html += '<div class="mini-day-dots">';
-        var seen = {};
+
+      if(dayEvents.length>0 && cell.inMonth && !isToday){
+        // Cercle coloré : si un seul enfant → sa couleur, si plusieurs → dégradé bisect
+        var seenColors = [];
+        var seenIds = {};
         dayEvents.forEach(function(ev){
-          (ev.memberIds.length ? ev.memberIds : ["_none"]).forEach(function(mid){
-            if(seen[mid]) return;
-            seen[mid] = true;
+          (ev.memberIds.length ? ev.memberIds : []).forEach(function(mid){
+            if(seenIds[mid]) return;
+            seenIds[mid] = true;
             var member = state.members.find(function(m){ return m.id===mid; });
-            var color = member ? getKidColor(member.color).hex : "#C7C4B8";
-            html += '<span class="mini-day-dot" style="background:'+color+'"></span>';
+            if(member) seenColors.push(getKidColor(member.color).hex);
           });
         });
-        html += '</div>';
+        var borderStyle = seenColors.length===1
+          ? '2px solid '+seenColors[0]
+          : '2px solid '+seenColors[0];
+        var bgStyle = seenColors.length>=2
+          ? 'conic-gradient('+seenColors[0]+' 0deg 180deg, '+seenColors[1]+' 180deg 360deg)'
+          : 'transparent';
+        html += '<span class="mini-day-num" style="border-radius:50%;width:17px;height:17px;display:flex;align-items:center;justify-content:center;font-size:8.5px;border:'+borderStyle+';background:'+bgStyle+';color:var(--text-secondary);">'+cell.date.getDate()+'</span>';
+      } else {
+        html += '<span class="mini-day-num'+(isToday?" today":"")+'">'+cell.date.getDate()+'</span>';
       }
       html += '</div>';
     });
@@ -800,6 +842,7 @@
       sorted.forEach(function(n){
         html += '<div class="note-item" data-edit-note="'+n.id+'">';
         html += '<div class="note-item-top">';
+        if(n.label) html += '<span style="font-size:12px;font-weight:800;">'+esc(n.label)+'</span>';
         html += '<button class="note-item-del" data-del-note="'+n.id+'" aria-label="Supprimer"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button></div>';
         var metaParts = [];
         if(n.date) metaParts.push(formatDateShort(n.date));
@@ -950,7 +993,7 @@
 
   function openNoteModal(note){
     currentNote = note ? Object.assign({}, note) : {
-      id:null, date:"", time:"", location:"", comment:""
+      id:null, label:"", date:"", time:"", location:"", comment:""
     };
     renderNoteModal();
   }
@@ -966,6 +1009,8 @@
 
     html += '<div class="modal-body">';
 
+    html += '<div class="field"><label class="field-label">Intitulé</label><input type="text" id="n-label" placeholder="Ex. Réunion école" value="'+esc(n.label||'')+'"></div>';
+
     html += '<div class="field-row">';
     html += '<div class="field"><label class="field-label">Date (optionnel)</label><input type="date" id="n-date" value="'+esc(n.date)+'"></div>';
     html += '<div class="field"><label class="field-label">Heure (optionnel)</label><input type="time" id="n-time" value="'+esc(n.time)+'"></div>';
@@ -973,7 +1018,7 @@
 
     html += '<div class="field"><label class="field-label">Lieu (optionnel)</label><input type="text" id="n-location" placeholder="Ex. Mairie" value="'+esc(n.location)+'"></div>';
 
-    html += '<div class="field"><label class="field-label">Note</label><textarea id="n-comment" placeholder="Écris ta note ici..." rows="4">'+esc(n.comment)+'</textarea></div>';
+    html += '<div class="field"><label class="field-label">Commentaire (optionnel)</label><textarea id="n-comment" placeholder="Détails supplémentaires..." rows="3">'+esc(n.comment)+'</textarea></div>';
     html += '</div>';
 
     html += '<div class="modal-footer">';
@@ -983,7 +1028,7 @@
       html += '<span></span>';
     }
     html += '<div class="footer-actions"><button class="secondary-btn" id="note-cancel">Annuler</button>';
-    html += '<button class="primary-btn" id="note-save">'+(isEdit?"Enregistrer":"Ajouter")+'</button></div>';
+    html += '<button class="primary-btn" id="note-save" '+((!n.label&&!isEdit)?'disabled':'')+' style="opacity:'+((!n.label&&!isEdit)?'0.4':'1')+'">'+(isEdit?"Enregistrer":"Ajouter")+'</button></div>';
     html += '</div></div></div>';
 
     root.innerHTML = html;
@@ -992,6 +1037,12 @@
     document.getElementById("note-cancel").addEventListener("click", closeNoteModal);
     document.getElementById("note-overlay").addEventListener("click", function(e){ if(e.target.id==="note-overlay") closeNoteModal(); });
 
+    document.getElementById("n-label").addEventListener("input", function(e){
+      currentNote.label = e.target.value;
+      var btn = document.getElementById("note-save");
+      var ok = !!e.target.value.trim();
+      btn.disabled = !ok; btn.style.opacity = ok?"1":"0.4";
+    });
     document.getElementById("n-date").addEventListener("input", function(e){ currentNote.date = e.target.value; });
     document.getElementById("n-time").addEventListener("input", function(e){ currentNote.time = e.target.value; });
     document.getElementById("n-location").addEventListener("input", function(e){ currentNote.location = e.target.value; });
@@ -1008,6 +1059,7 @@
       });
     }
     document.getElementById("note-save").addEventListener("click", function(){
+      if(!currentNote.label && !currentNote.comment) return;
       if(currentNote.id){
         state.notes = state.notes.map(function(n){ return n.id===currentNote.id ? Object.assign({}, currentNote) : n; });
       } else {
@@ -1149,27 +1201,30 @@
   // ---------- Chat ----------
   var chatOpen = false;
   var chatRef = null;
-  var chatUnread = 0;
   var chatLastSeen = 0;
+  var replyTo = null; // { id, text }
   try{ chatLastSeen = parseInt(localStorage.getItem("family-rdv-chat-seen")||"0"); }catch(e){}
 
   function initChat(code){
     chatRef = db.collection("agendas").doc(codeToDocId(code)).collection("chat");
-    chatRef.orderBy("ts").limitToLast(60).onSnapshot(function(snap){
+    chatRef.orderBy("ts").limitToLast(80).onSnapshot(function(snap){
       var msgs = [];
       snap.forEach(function(doc){ msgs.push(Object.assign({id:doc.id}, doc.data())); });
       renderChatMessages(msgs);
-      // badge unread
       if(!chatOpen){
-        var newCount = msgs.filter(function(m){ return m.ts > chatLastSeen; }).length;
-        chatUnread = newCount;
+        var newCount = msgs.filter(function(m){ return (m.ts||0) > chatLastSeen; }).length;
         var badge = document.getElementById("chat-badge");
-        if(badge){
-          badge.textContent = newCount;
-          badge.classList.toggle("hidden", newCount===0);
-        }
+        if(badge){ badge.textContent = newCount; badge.classList.toggle("hidden", newCount===0); }
       }
-    });
+    }, function(err){ console.error("chat error", err); });
+  }
+
+  function getDeviceId(){
+    try{
+      var id = localStorage.getItem("family-rdv-device-id");
+      if(!id){ id = uid(); localStorage.setItem("family-rdv-device-id", id); }
+      return id;
+    }catch(e){ return "unknown-"+Math.random().toString(36).slice(2); }
   }
 
   function renderChatMessages(msgs){
@@ -1179,48 +1234,76 @@
       wrap.innerHTML = '<div class="chat-empty">Pas encore de messages. Dites bonjour ! 👋</div>';
       return;
     }
-    // On utilise un device ID simple pour distinguer "mine" vs "theirs"
     var deviceId = getDeviceId();
     wrap.innerHTML = msgs.map(function(m){
       var isMine = m.deviceId === deviceId;
-      var d = new Date(m.ts);
+      var side = isMine ? "mine" : "theirs";
+      var d = new Date(m.ts||Date.now());
       var timeStr = pad(d.getHours())+":"+pad(d.getMinutes());
-      return '<div class="chat-msg '+(isMine?"mine":"theirs")+'">'
-        + '<div class="chat-bubble">'+esc(m.text)+'</div>'
-        + '<span class="chat-time">'+timeStr+'</span>'
-        + '</div>';
+      var out = '<div class="chat-msg-wrap '+side+'" data-msg-id="'+esc(m.id)+'">';
+      if(m.replyTo){
+        out += '<div class="chat-quoted">↩ '+esc(m.replyTo.text.slice(0,60))+'</div>';
+      }
+      out += '<div class="chat-bubble">'+esc(m.text)+'</div>';
+      out += '<div class="chat-meta">';
+      out += '<span class="chat-time">'+timeStr+'</span>';
+      out += '<button class="chat-reply-btn" data-reply-id="'+esc(m.id)+'" data-reply-text="'+esc(m.text)+'">'
+        + '<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 17 4 12 9 7"/><path d="M20 18v-2a4 4 0 0 0-4-4H4"/></svg>'
+        + 'Répondre</button>';
+      out += '</div></div>';
+      return out;
     }).join("");
-    wrap.scrollTop = wrap.scrollHeight;
+
+    // Listeners répondre
+    wrap.querySelectorAll(".chat-reply-btn").forEach(function(btn){
+      btn.addEventListener("click", function(){
+        replyTo = { id: btn.getAttribute("data-reply-id"), text: btn.getAttribute("data-reply-text") };
+        var bar = document.getElementById("chat-reply-bar");
+        var barText = document.getElementById("chat-reply-bar-text");
+        barText.textContent = "↩ "+replyTo.text.slice(0,60);
+        bar.classList.remove("hidden");
+        document.getElementById("chat-input").focus();
+      });
+    });
+
+    if(chatOpen) wrap.scrollTop = wrap.scrollHeight;
   }
 
-  function getDeviceId(){
-    try{
-      var id = localStorage.getItem("family-rdv-device-id");
-      if(!id){ id = uid(); localStorage.setItem("family-rdv-device-id", id); }
-      return id;
-    }catch(e){ return "unknown"; }
+  function doSendMessage(){
+    var input = document.getElementById("chat-input");
+    var text = (input.value||"").trim();
+    if(!chatRef || !text) return;
+    var msg = { text:text, ts:Date.now(), deviceId:getDeviceId() };
+    if(replyTo) msg.replyTo = { id:replyTo.id, text:replyTo.text };
+    chatRef.add(msg).then(function(){
+      input.value = "";
+      replyTo = null;
+      var bar = document.getElementById("chat-reply-bar");
+      if(bar) bar.classList.add("hidden");
+      var wrap = document.getElementById("chat-messages");
+      if(wrap) setTimeout(function(){ wrap.scrollTop = wrap.scrollHeight; }, 100);
+    }).catch(function(err){ console.error("send error", err); });
   }
 
-  function sendChatMessage(text){
-    if(!chatRef || !text.trim()) return;
-    chatRef.add({ text:text.trim(), ts:Date.now(), deviceId:getDeviceId() });
-  }
+  document.getElementById("chat-reply-cancel").addEventListener("click", function(){
+    replyTo = null;
+    document.getElementById("chat-reply-bar").classList.add("hidden");
+    document.getElementById("chat-input").focus();
+  });
 
   document.getElementById("chat-fab").addEventListener("click", function(){
     chatOpen = !chatOpen;
     document.getElementById("chat-panel").classList.toggle("hidden", !chatOpen);
     if(chatOpen){
-      chatUnread = 0;
       chatLastSeen = Date.now();
       try{ localStorage.setItem("family-rdv-chat-seen", chatLastSeen); }catch(e){}
       var badge = document.getElementById("chat-badge");
       if(badge){ badge.textContent="0"; badge.classList.add("hidden"); }
-      // scroll to bottom
       setTimeout(function(){
         var wrap = document.getElementById("chat-messages");
         if(wrap) wrap.scrollTop = wrap.scrollHeight;
         document.getElementById("chat-input").focus();
-      }, 50);
+      }, 60);
     }
   });
 
@@ -1229,19 +1312,10 @@
     document.getElementById("chat-panel").classList.add("hidden");
   });
 
-  document.getElementById("chat-send-btn").addEventListener("click", function(){
-    var input = document.getElementById("chat-input");
-    sendChatMessage(input.value);
-    input.value = "";
-  });
+  document.getElementById("chat-send-btn").addEventListener("click", doSendMessage);
 
   document.getElementById("chat-input").addEventListener("keydown", function(e){
-    if(e.key==="Enter" && !e.shiftKey){
-      e.preventDefault();
-      var input = document.getElementById("chat-input");
-      sendChatMessage(input.value);
-      input.value = "";
-    }
+    if(e.key==="Enter" && !e.shiftKey){ e.preventDefault(); doSendMessage(); }
   });
 
   // ---------- Lock screen listeners ----------
