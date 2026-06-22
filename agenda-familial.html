@@ -78,7 +78,7 @@
     position:sticky; top:0; z-index:20;
     background:linear-gradient(135deg, #7B6FF5 0%, #A78BFA 55%, #C084FC 100%);
     color:#fff;
-    padding:calc(env(safe-area-inset-top) + 10px) 16px 12px;
+    padding:calc(env(safe-area-inset-top) + 12px) 16px 14px;
     display:flex; align-items:center; justify-content:space-between;
     overflow:hidden;
   }
@@ -95,25 +95,33 @@
     width:110px; height:110px; border-radius:50%;
     background:rgba(255,255,255,0.07); pointer-events:none;
   }
-  .topbar-left{ display:flex; align-items:center; gap:12px; flex:1; min-width:0; }
-  .topbar-icon{
-    width:44px; height:44px; border-radius:14px;
+  .topbar-center{
+    position:absolute; left:50%; transform:translateX(-50%);
+    display:flex; flex-direction:column; align-items:center; gap:2px;
+    pointer-events:none;
+  }
+  .topbar-title-main{
+    font-family:'Nunito', sans-serif;
+    font-size:26px; font-weight:900; margin:0; letter-spacing:-0.5px; line-height:1.1;
+    text-shadow:0 2px 6px rgba(0,0,0,0.18);
+  }
+  .topbar-title-sub{ font-size:10.5px; font-weight:700; opacity:0.85; margin:0; }
+  .topbar-km{
+    width:42px; height:42px; border-radius:50%;
     background:rgba(255,255,255,0.22);
     display:flex; align-items:center; justify-content:center;
     flex-shrink:0; box-shadow:0 2px 8px rgba(0,0,0,0.15);
+    font-family:'Nunito', sans-serif; font-size:14px; font-weight:900; color:#fff;
+    letter-spacing:-0.5px;
   }
-  .topbar-text{ min-width:0; }
-  .topbar-title-main{
-    font-family:'Nunito', sans-serif;
-    font-size:21px; font-weight:900; margin:0; letter-spacing:-0.3px; line-height:1.15;
-    text-shadow:0 1px 4px rgba(0,0,0,0.18);
-  }
-  .topbar-title-sub{ font-size:10.5px; font-weight:700; opacity:0.85; margin:1px 0 0; }
+  .topbar-left{ display:flex; align-items:center; gap:0; }
+  .topbar-text{ display:none; }
+  .topbar-icon{ display:none; }
   .logo-dot{ display:none; }
   .topbar-title{ display:none; }
-  .topbar-actions{display:flex; gap:8px; flex-shrink:0;}
+  .topbar-actions{ display:flex; gap:8px; flex-shrink:0; }
   .icon-btn{
-    width:36px;height:36px;border-radius:11px;
+    width:36px; height:36px; border-radius:11px;
     border:none; background:rgba(255,255,255,0.18); color:#fff;
     display:flex; align-items:center; justify-content:center;
   }
@@ -470,21 +478,11 @@
 
 <div class="topbar">
   <div class="topbar-left">
-    <div class="topbar-icon">
-      <!-- Petite illustration post-it avec punaise -->
-      <svg width="26" height="26" viewBox="0 0 26 26" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <rect x="3" y="5" width="20" height="18" rx="3" fill="rgba(255,255,255,0.9)"/>
-        <rect x="6" y="10" width="14" height="2" rx="1" fill="#A78BFA"/>
-        <rect x="6" y="14" width="10" height="2" rx="1" fill="#FDE047"/>
-        <rect x="6" y="18" width="7" height="2" rx="1" fill="#34EE9A"/>
-        <circle cx="13" cy="5" r="3" fill="rgba(255,255,255,0.85)" stroke="#E0D8FF" stroke-width="0.8"/>
-        <circle cx="13" cy="5" r="1.2" fill="#C4BAFF"/>
-      </svg>
-    </div>
-    <div class="topbar-text">
-      <p class="topbar-title-main">🗓 Famille ✨</p>
-      <p class="topbar-title-sub sync-badge"><span class="sync-dot" id="sync-dot"></span><span id="sync-text">Synchronisé</span></p>
-    </div>
+    <div class="topbar-km">KM</div>
+  </div>
+  <div class="topbar-center">
+    <p class="topbar-title-main">✨ Famille ✨</p>
+    <p class="topbar-title-sub sync-badge"><span class="sync-dot" id="sync-dot"></span><span id="sync-text">Synchronisé</span></p>
   </div>
   <div class="topbar-actions">
     <button class="icon-btn" id="btn-theme" aria-label="Changer de thème" title="Dark / Light">
