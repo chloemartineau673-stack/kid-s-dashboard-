@@ -12,29 +12,51 @@
 <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore-compat.js"></script>
 <style>
   :root{
-    --bg:#FAF9F5;
+    --bg:#F5F4FF;
     --surface:#FFFFFF;
-    --surface-2:#F2F0E8;
-    --border:#E5E2D8;
-    --border-strong:#D6D2C4;
-    --text:#21201B;
-    --text-secondary:#65635A;
-    --text-tertiary:#928F82;
-    --accent:#7B7AC9;
-    --accent-light:#EDECFB;
-    --accent-text:#3C3489;
-    --danger:#A32D2D;
-    --danger-bg:#FCEBEB;
-    --danger-border:#F09595;
-    --nina-dot:#8B7FE8; --nina-bg:#C9C0F7; --nina-border:#8B7FE8; --nina-text:#3A2A8C;
-    --ilhan-dot:#F2C230; --ilhan-bg:#FCE680; --ilhan-border:#E8AE0E; --ilhan-text:#6B4E0A;
-    --notes-dot:#5FCC8C; --notes-bg:#A8E8C0; --notes-border:#3FAE6E; --notes-text:#0F4D2A;
-    --pin-color:#FFFFFF; --pin-shadow-color:#C9C5B8;
+    --surface-2:#EEECFF;
+    --border:#DDD9FF;
+    --border-strong:#C4BEFF;
+    --text:#1A1830;
+    --text-secondary:#4A4770;
+    --text-tertiary:#8E8BB0;
+    --accent:#7B6FF5;
+    --accent-light:#EAE7FF;
+    --accent-text:#3A2AB8;
+    --danger:#D63B3B;
+    --danger-bg:#FFECEC;
+    --danger-border:#F5A0A0;
+    --nina-dot:#A78BFA; --nina-bg:#DDD5FF; --nina-border:#A78BFA; --nina-text:#3B1FA8;
+    --ilhan-dot:#FDE047; --ilhan-bg:#FEF686; --ilhan-border:#EAC80A; --ilhan-text:#6B4E0A;
+    --notes-dot:#34EE9A; --notes-bg:#AAFAD8; --notes-border:#1ED97A; --notes-text:#065A2E;
+    --chat-bg:#E0F2FF; --chat-border:#7DD3FC; --chat-text:#0C3A5C;
     --radius-sm:6px;
     --radius-md:10px;
     --radius-lg:16px;
-    --shadow-modal:0 12px 32px rgba(30,28,20,0.18);
-    --shadow-postit:0 6px 14px rgba(40,35,20,0.22), 0 2px 4px rgba(40,35,20,0.12);
+    --shadow-modal:0 12px 32px rgba(30,20,80,0.22);
+    --shadow-postit:0 8px 18px rgba(60,40,160,0.18), 0 2px 5px rgba(60,40,160,0.10);
+  }
+  body.dark{
+    --bg:#13111F;
+    --surface:#1E1B30;
+    --surface-2:#28243E;
+    --border:#3A355A;
+    --border-strong:#504A7A;
+    --text:#EDE9FF;
+    --text-secondary:#B8B0E8;
+    --text-tertiary:#6E68A0;
+    --accent:#9D8FFF;
+    --accent-light:#2A2350;
+    --accent-text:#C4BAFF;
+    --danger:#E05A5A;
+    --danger-bg:#3A1A1A;
+    --danger-border:#8A3A3A;
+    --nina-dot:#A78BFA; --nina-bg:#2D2060; --nina-border:#7B6FD0; --nina-text:#C4BAFF;
+    --ilhan-dot:#FDE047; --ilhan-bg:#3A3000; --ilhan-border:#A88C00; --ilhan-text:#FDE047;
+    --notes-dot:#34EE9A; --notes-bg:#003A20; --notes-border:#1A8A50; --notes-text:#34EE9A;
+    --chat-bg:#0A2030; --chat-border:#1A5A80; --chat-text:#7DD3FC;
+    --shadow-modal:0 12px 32px rgba(0,0,0,0.55);
+    --shadow-postit:0 8px 22px rgba(0,0,0,0.45), 0 2px 5px rgba(0,0,0,0.25);
   }
   *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
   html,body{margin:0;padding:0;}
@@ -99,16 +121,11 @@
   .kid-card:active{ transform:rotate(0deg) scale(1.02); }
 
   .postit-pin{
-    position:absolute; top:-9px; left:50%; transform:translateX(-50%);
-    width:17px; height:17px; border-radius:50%;
-    background:radial-gradient(circle at 35% 30%, #ffffff 0%, #e2e2e2 55%, #b8b8b8 100%);
-    box-shadow:0 2px 3px rgba(0,0,0,0.35), inset 0 -1px 1px rgba(0,0,0,0.15);
-    z-index:5;
+    position:absolute; top:-22px; left:50%; transform:translateX(-50%);
+    width:14px; height:28px;
+    z-index:5; pointer-events:none;
   }
-  .postit-pin::after{
-    content:""; position:absolute; inset:4px; border-radius:50%;
-    background:radial-gradient(circle at 35% 30%, #ffffff 0%, #d8d8d8 100%);
-  }
+  .postit-pin svg{ width:14px; height:28px; overflow:visible; }
 
   .kid-card-header{
     display:flex; align-items:center; justify-content:center; position:relative;
@@ -306,6 +323,66 @@
 
   svg{ display:block; }
 
+  /* ---------- Chat flottant ---------- */
+  .chat-fab{
+    position:fixed; right:18px; bottom:calc(env(safe-area-inset-bottom) + 18px); z-index:40;
+    width:52px; height:52px; border-radius:50%;
+    background:var(--accent); color:#fff; border:none;
+    display:flex; align-items:center; justify-content:center;
+    box-shadow:0 4px 14px rgba(123,111,245,0.45);
+  }
+  .chat-badge{
+    position:absolute; top:-4px; right:-4px;
+    width:18px; height:18px; border-radius:50%;
+    background:#FF4C8B; color:#fff;
+    font-size:10px; font-weight:800;
+    display:flex; align-items:center; justify-content:center;
+    border:2px solid var(--bg);
+  }
+  .chat-panel{
+    position:fixed; right:14px; bottom:calc(env(safe-area-inset-bottom) + 80px); z-index:39;
+    width:min(340px, calc(100vw - 28px));
+    background:var(--surface);
+    border:1.5px solid var(--border);
+    border-radius:18px;
+    box-shadow:0 8px 28px rgba(60,40,160,0.18);
+    display:flex; flex-direction:column; overflow:hidden;
+    max-height:420px;
+  }
+  .chat-panel-header{
+    display:flex; align-items:center; justify-content:space-between;
+    padding:12px 14px; background:var(--accent); color:#fff; flex-shrink:0;
+  }
+  .chat-panel-title{ font-size:14px; font-weight:700; display:flex; align-items:center; gap:7px; }
+  .chat-close-btn{ background:rgba(255,255,255,0.18); border:none; color:#fff; width:26px;height:26px;border-radius:8px; display:flex;align-items:center;justify-content:center; }
+  .chat-messages{
+    flex:1; overflow-y:auto; padding:12px; display:flex; flex-direction:column; gap:8px;
+    scroll-behavior:smooth;
+  }
+  .chat-msg{ display:flex; flex-direction:column; max-width:85%; }
+  .chat-msg.mine{ align-self:flex-end; align-items:flex-end; }
+  .chat-msg.theirs{ align-self:flex-start; align-items:flex-start; }
+  .chat-bubble{
+    padding:8px 11px; border-radius:14px; font-size:13px; line-height:1.4; word-break:break-word;
+  }
+  .chat-msg.mine .chat-bubble{ background:var(--accent); color:#fff; border-bottom-right-radius:4px; }
+  .chat-msg.theirs .chat-bubble{ background:var(--surface-2); color:var(--text); border-bottom-left-radius:4px; }
+  .chat-time{ font-size:10px; color:var(--text-tertiary); margin-top:3px; padding:0 3px; }
+  .chat-empty{ text-align:center; color:var(--text-tertiary); font-size:13px; padding:20px 0; }
+  .chat-input-row{
+    display:flex; gap:8px; padding:10px 12px; border-top:1px solid var(--border); flex-shrink:0;
+  }
+  .chat-input{
+    flex:1; height:38px; padding:0 11px; font-size:13.5px; border-radius:20px;
+    border:1.5px solid var(--border-strong); background:var(--surface-2); color:var(--text);
+  }
+  .chat-input:focus{ outline:none; border-color:var(--accent); }
+  .chat-send-btn{
+    width:38px;height:38px;border-radius:50%;background:var(--accent);color:#fff;border:none;
+    display:flex;align-items:center;justify-content:center; flex-shrink:0;
+  }
+  .chat-panel.hidden{ display:none; }
+
   /* ---------- Lock / login screen ---------- */
   #lock-screen{
     position:fixed; inset:0; z-index:200; background:var(--bg);
@@ -352,6 +429,10 @@
     </div>
   </div>
   <div class="topbar-actions">
+    <button class="icon-btn" id="btn-theme" aria-label="Changer de thème" title="Dark / Light">
+      <svg id="theme-icon-sun" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:none"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+      <svg id="theme-icon-moon" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+    </button>
     <button class="icon-btn" id="btn-members" aria-label="Gérer les enfants">
       <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
     </button>
@@ -366,6 +447,30 @@
   </div>
 </main>
 
+<div class="chat-panel hidden" id="chat-panel">
+  <div class="chat-panel-header">
+    <span class="chat-panel-title">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+      Messages
+    </span>
+    <button class="chat-close-btn" id="chat-close-btn" aria-label="Fermer le chat">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+    </button>
+  </div>
+  <div class="chat-messages" id="chat-messages"></div>
+  <div class="chat-input-row">
+    <input type="text" class="chat-input" id="chat-input" placeholder="Écris un message..." maxlength="500">
+    <button class="chat-send-btn" id="chat-send-btn" aria-label="Envoyer">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+    </button>
+  </div>
+</div>
+
+<button class="chat-fab" id="chat-fab" aria-label="Ouvrir le chat">
+  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+  <span class="chat-badge hidden" id="chat-badge">0</span>
+</button>
+
 <div id="modal-root"></div>
 
 </div><!-- /#app-root -->
@@ -376,22 +481,25 @@
 
   // ---------- Config ----------
   var KID_COLORS = [
-    { key:"blueviolet", dot:"var(--nina-dot)",  bg:"var(--nina-bg)",  border:"var(--nina-border)",  text:"var(--nina-text)",  hex:"#9C9BE0" },
-    { key:"yellow",     dot:"var(--ilhan-dot)", bg:"var(--ilhan-bg)", border:"var(--ilhan-border)", text:"var(--ilhan-text)", hex:"#E8C24D" },
-    { key:"teal",       dot:"#5DCAA5", bg:"#E1F5EE", border:"#9DDFC6", text:"#085041", hex:"#5DCAA5" },
-    { key:"corail",     dot:"#F0997B", bg:"#FAECE7", border:"#F3B69E", text:"#712B13", hex:"#F0997B" },
-    { key:"rose",       dot:"#ED93B1", bg:"#FBEAF0", border:"#F2B3C7", text:"#72243E", hex:"#ED93B1" },
-    { key:"bleu",       dot:"#85B7EB", bg:"#E6F1FB", border:"#AED0F2", text:"#0C447C", hex:"#85B7EB" }
+    { key:"blueviolet", dot:"var(--nina-dot)",  bg:"var(--nina-bg)",  border:"var(--nina-border)",  text:"var(--nina-text)",  hex:"#A78BFA" },
+    { key:"yellow",     dot:"var(--ilhan-dot)", bg:"var(--ilhan-bg)", border:"var(--ilhan-border)", text:"var(--ilhan-text)", hex:"#FDE047" },
+    { key:"teal",       dot:"#34EE9A", bg:"#AAFAD8", border:"#1ED97A", text:"#065A2E", hex:"#34EE9A" },
+    { key:"corail",     dot:"#FF7B7B", bg:"#FFD6D6", border:"#FF4444", text:"#7A0000", hex:"#FF7B7B" },
+    { key:"rose",       dot:"#FF80D5", bg:"#FFD6F5", border:"#FF00BB", text:"#7A005A", hex:"#FF80D5" },
+    { key:"bleu",       dot:"#60C8FF", bg:"#C0EAFF", border:"#0099FF", text:"#003A6B", hex:"#60C8FF" }
   ];
 
-  var EVENT_TYPES = [
-    { key:"medical", label:"Médical" },
-    { key:"sport", label:"Sport" },
-    { key:"ecole", label:"École" },
-    { key:"sortie", label:"Sortie" },
-    { key:"famille", label:"Famille" },
-    { key:"autre", label:"Autre" }
-  ];
+  // SVG épingle réaliste (tête sphérique blanche + tige grise)
+  var PIN_SVG = '<div class="postit-pin"><svg viewBox="0 0 14 28" fill="none" xmlns="http://www.w3.org/2000/svg">'
+    + '<line x1="7" y1="10" x2="7" y2="28" stroke="#9090A0" stroke-width="1.8" stroke-linecap="round"/>'
+    + '<circle cx="7" cy="7" r="6.5" fill="url(#pinGrad)" stroke="#C0C0D0" stroke-width="0.8"/>'
+    + '<circle cx="4.5" cy="4.5" r="2.2" fill="rgba(255,255,255,0.75)"/>'
+    + '<defs><radialGradient id="pinGrad" cx="35%" cy="30%" r="65%">'
+    + '<stop offset="0%" stop-color="#FFFFFF"/>'
+    + '<stop offset="55%" stop-color="#E0E0EE"/>'
+    + '<stop offset="100%" stop-color="#B0B0C8"/>'
+    + '</radialGradient></defs>'
+    + '</svg></div>';
 
   var DEFAULT_KIDS = [
     { id:"k1", name:"Nina", color:"blueviolet" },
@@ -472,6 +580,7 @@
       document.getElementById("lock-screen").classList.add("app-hidden");
       document.getElementById("app-root").classList.remove("app-hidden");
       subscribeToChanges();
+      initChat(code);
     }).catch(function(err){
       showLockError("Connexion impossible. Vérifie ta connexion internet et réessaie.");
     });
@@ -542,7 +651,7 @@
       card.className = "kid-card";
       card.style.background = c.bg;
 
-      var headerHTML = '<div class="postit-pin"></div>';
+      var headerHTML = PIN_SVG;
       headerHTML += '<div class="kid-card-header" style="color:'+c.text+'">';
       headerHTML += '<div class="kid-card-name"><span class="kid-card-avatar" style="background:'+c.dot+'">'+esc(m.name.charAt(0).toUpperCase())+'</span><span>'+esc(m.name)+'</span></div>';
       headerHTML += '<button class="kid-card-edit" data-edit-kid="'+m.id+'" style="color:'+c.text+'" aria-label="Modifier"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.12 2.12 0 0 1 3 3L12 15l-4 1 1-4Z"/></svg></button>';
@@ -681,7 +790,7 @@
       return da.localeCompare(db);
     });
 
-    var html = '<div class="postit-pin"></div><div class="notes-card-header"><span class="notes-card-title"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3v4a1 1 0 0 0 1 1h4"/><path d="M17 21H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h7l5 5v11a2 2 0 0 1-2 2Z"/></svg>Notes</span>';
+    var html = PIN_SVG + '<div class="notes-card-header"><span class="notes-card-title"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3v4a1 1 0 0 0 1 1h4"/><path d="M17 21H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h7l5 5v11a2 2 0 0 1-2 2Z"/></svg>Notes</span>';
     html += '<button class="notes-add-btn" id="notes-add-btn" aria-label="Ajouter une note"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></button></div>';
 
     if(sorted.length===0){
@@ -689,9 +798,8 @@
     } else {
       html += '<div class="notes-list">';
       sorted.forEach(function(n){
-        var t = getEventType(n.type);
         html += '<div class="note-item" data-edit-note="'+n.id+'">';
-        html += '<div class="note-item-top"><span class="note-item-type">'+esc(t.label)+'</span>';
+        html += '<div class="note-item-top">';
         html += '<button class="note-item-del" data-del-note="'+n.id+'" aria-label="Supprimer"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button></div>';
         var metaParts = [];
         if(n.date) metaParts.push(formatDateShort(n.date));
@@ -842,7 +950,7 @@
 
   function openNoteModal(note){
     currentNote = note ? Object.assign({}, note) : {
-      id:null, type:"famille", date:"", time:"", location:"", comment:""
+      id:null, date:"", time:"", location:"", comment:""
     };
     renderNoteModal();
   }
@@ -858,13 +966,6 @@
 
     html += '<div class="modal-body">';
 
-    html += '<div class="field"><label class="field-label">Type d\'événement</label><div class="opt-grid" id="n-types">';
-    EVENT_TYPES.forEach(function(t){
-      var active = n.type===t.key;
-      html += '<button type="button" class="opt-btn'+(active?" active":"")+'" data-type="'+t.key+'" style="'+(active?'background:var(--notes-bg);border-color:var(--notes-border);color:var(--notes-text)':'')+'">'+esc(t.label)+'</button>';
-    });
-    html += '</div></div>';
-
     html += '<div class="field-row">';
     html += '<div class="field"><label class="field-label">Date (optionnel)</label><input type="date" id="n-date" value="'+esc(n.date)+'"></div>';
     html += '<div class="field"><label class="field-label">Heure (optionnel)</label><input type="time" id="n-time" value="'+esc(n.time)+'"></div>';
@@ -872,7 +973,7 @@
 
     html += '<div class="field"><label class="field-label">Lieu (optionnel)</label><input type="text" id="n-location" placeholder="Ex. Mairie" value="'+esc(n.location)+'"></div>';
 
-    html += '<div class="field"><label class="field-label">Commentaire</label><textarea id="n-comment" placeholder="Détails...">'+esc(n.comment)+'</textarea></div>';
+    html += '<div class="field"><label class="field-label">Note</label><textarea id="n-comment" placeholder="Écris ta note ici..." rows="4">'+esc(n.comment)+'</textarea></div>';
     html += '</div>';
 
     html += '<div class="modal-footer">';
@@ -895,13 +996,6 @@
     document.getElementById("n-time").addEventListener("input", function(e){ currentNote.time = e.target.value; });
     document.getElementById("n-location").addEventListener("input", function(e){ currentNote.location = e.target.value; });
     document.getElementById("n-comment").addEventListener("input", function(e){ currentNote.comment = e.target.value; });
-
-    root.querySelectorAll("#n-types .opt-btn").forEach(function(btn){
-      btn.addEventListener("click", function(){
-        currentNote.type = btn.getAttribute("data-type");
-        renderNoteModal();
-      });
-    });
 
     if(isEdit){
       document.getElementById("note-delete").addEventListener("click", function(){
@@ -1037,6 +1131,118 @@
 
   // ---------- Top-level listeners ----------
   document.getElementById("btn-members").addEventListener("click", openMembersModal);
+
+  // ---------- Dark / Light mode ----------
+  var isDark = false;
+  try{ isDark = localStorage.getItem("family-rdv-dark")==="1"; }catch(e){}
+  function applyTheme(){
+    document.body.classList.toggle("dark", isDark);
+    document.getElementById("theme-icon-sun").style.display = isDark ? "block" : "none";
+    document.getElementById("theme-icon-moon").style.display = isDark ? "none" : "block";
+    try{ localStorage.setItem("family-rdv-dark", isDark?"1":"0"); }catch(e){}
+  }
+  applyTheme();
+  document.getElementById("btn-theme").addEventListener("click", function(){
+    isDark = !isDark; applyTheme();
+  });
+
+  // ---------- Chat ----------
+  var chatOpen = false;
+  var chatRef = null;
+  var chatUnread = 0;
+  var chatLastSeen = 0;
+  try{ chatLastSeen = parseInt(localStorage.getItem("family-rdv-chat-seen")||"0"); }catch(e){}
+
+  function initChat(code){
+    chatRef = db.collection("agendas").doc(codeToDocId(code)).collection("chat");
+    chatRef.orderBy("ts").limitToLast(60).onSnapshot(function(snap){
+      var msgs = [];
+      snap.forEach(function(doc){ msgs.push(Object.assign({id:doc.id}, doc.data())); });
+      renderChatMessages(msgs);
+      // badge unread
+      if(!chatOpen){
+        var newCount = msgs.filter(function(m){ return m.ts > chatLastSeen; }).length;
+        chatUnread = newCount;
+        var badge = document.getElementById("chat-badge");
+        if(badge){
+          badge.textContent = newCount;
+          badge.classList.toggle("hidden", newCount===0);
+        }
+      }
+    });
+  }
+
+  function renderChatMessages(msgs){
+    var wrap = document.getElementById("chat-messages");
+    if(!wrap) return;
+    if(msgs.length===0){
+      wrap.innerHTML = '<div class="chat-empty">Pas encore de messages. Dites bonjour ! 👋</div>';
+      return;
+    }
+    // On utilise un device ID simple pour distinguer "mine" vs "theirs"
+    var deviceId = getDeviceId();
+    wrap.innerHTML = msgs.map(function(m){
+      var isMine = m.deviceId === deviceId;
+      var d = new Date(m.ts);
+      var timeStr = pad(d.getHours())+":"+pad(d.getMinutes());
+      return '<div class="chat-msg '+(isMine?"mine":"theirs")+'">'
+        + '<div class="chat-bubble">'+esc(m.text)+'</div>'
+        + '<span class="chat-time">'+timeStr+'</span>'
+        + '</div>';
+    }).join("");
+    wrap.scrollTop = wrap.scrollHeight;
+  }
+
+  function getDeviceId(){
+    try{
+      var id = localStorage.getItem("family-rdv-device-id");
+      if(!id){ id = uid(); localStorage.setItem("family-rdv-device-id", id); }
+      return id;
+    }catch(e){ return "unknown"; }
+  }
+
+  function sendChatMessage(text){
+    if(!chatRef || !text.trim()) return;
+    chatRef.add({ text:text.trim(), ts:Date.now(), deviceId:getDeviceId() });
+  }
+
+  document.getElementById("chat-fab").addEventListener("click", function(){
+    chatOpen = !chatOpen;
+    document.getElementById("chat-panel").classList.toggle("hidden", !chatOpen);
+    if(chatOpen){
+      chatUnread = 0;
+      chatLastSeen = Date.now();
+      try{ localStorage.setItem("family-rdv-chat-seen", chatLastSeen); }catch(e){}
+      var badge = document.getElementById("chat-badge");
+      if(badge){ badge.textContent="0"; badge.classList.add("hidden"); }
+      // scroll to bottom
+      setTimeout(function(){
+        var wrap = document.getElementById("chat-messages");
+        if(wrap) wrap.scrollTop = wrap.scrollHeight;
+        document.getElementById("chat-input").focus();
+      }, 50);
+    }
+  });
+
+  document.getElementById("chat-close-btn").addEventListener("click", function(){
+    chatOpen = false;
+    document.getElementById("chat-panel").classList.add("hidden");
+  });
+
+  document.getElementById("chat-send-btn").addEventListener("click", function(){
+    var input = document.getElementById("chat-input");
+    sendChatMessage(input.value);
+    input.value = "";
+  });
+
+  document.getElementById("chat-input").addEventListener("keydown", function(e){
+    if(e.key==="Enter" && !e.shiftKey){
+      e.preventDefault();
+      var input = document.getElementById("chat-input");
+      sendChatMessage(input.value);
+      input.value = "";
+    }
+  });
 
   // ---------- Lock screen listeners ----------
   function attemptLogin(){
