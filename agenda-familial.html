@@ -337,6 +337,23 @@
   .mini-day-cell.muted .mini-day-num{ opacity:0.28; }
   .mini-day-dots{ display:flex; gap:1.5px; position:absolute; bottom:1px; }
   .mini-day-dot{ width:3.5px;height:3.5px;border-radius:50%; }
+  .mini-day-cell.garde{ position:relative; }
+  .mini-day-cell .garde-stripe{
+    position:absolute; top:3px; bottom:3px; left:0; right:0;
+    pointer-events:none; opacity:0.28; border-radius:0;
+  }
+  .mini-day-cell.garde-start .garde-stripe{ border-radius:8px 0 0 8px; left:2px; }
+  .mini-day-cell.garde-end .garde-stripe{ border-radius:0 8px 8px 0; right:2px; }
+  .mini-day-cell.garde-start.garde-end .garde-stripe{ border-radius:8px; left:2px; right:2px; }
+  .mini-day-cell.garde{ cursor:pointer; }
+  .mini-day-cell.clickable-day{ cursor:pointer; }
+  .mini-day-cell.clickable-day:hover .mini-day-num:not(.today){ background:var(--surface-2); border-radius:50%; }
+  .garde-color-swatch{
+    width:24px; height:24px; border-radius:50%; cursor:pointer;
+    border:2px solid transparent; transition:transform 0.15s;
+  }
+  .garde-color-swatch.selected{ border-color:var(--text); transform:scale(1.2); }
+  .garde-color-swatch:hover{ transform:scale(1.15); }
 
   .notes-card{
     position:relative;
@@ -996,7 +1013,7 @@
   var DAYS_LONG = ["Dimanche","Lundi","Mardi","Mercredi","Jeudi","Vendredi","Samedi"];
 
   // ---------- State ----------
-  var state = { events:[], members: DEFAULT_KIDS.slice(), notes:[], todos:[], schedule:[] };
+  var state = { events:[], members: DEFAULT_KIDS.slice(), notes:[], todos:[], schedule:[], gardes:[] };
   var scheduleDay = "lundi";
   var activePage = "home"; // "home" | "college" | "activites"
   var miniCalCursor = (function(){ var d=new Date(); return new Date(d.getFullYear(), d.getMonth(), 1); })();
@@ -1085,6 +1102,7 @@
       state.notes = Array.isArray(data.notes) ? data.notes : [];
       state.todos = Array.isArray(data.todos) ? data.todos : [];
       state.schedule = Array.isArray(data.schedule) ? data.schedule : [];
+      state.gardes = Array.isArray(data.gardes) ? data.gardes : [];
       applyingRemoteUpdate = false;
       cleanPastEvents();
       setSyncStatus("Synchronisé");
@@ -1101,7 +1119,7 @@
     setSyncStatus("Synchronisation...", true);
     clearTimeout(saveDebounceTimer);
     saveDebounceTimer = setTimeout(function(){
-      docRef.set({ events: state.events, members: state.members, notes: state.notes, todos: state.todos, schedule: state.schedule, updatedAt: Date.now() })
+      docRef.set({ events: state.events, members: state.members, notes: state.notes, todos: state.todos, schedule: state.schedule, gardes: state.gardes, updatedAt: Date.now() })
         .then(function(){ setSyncStatus("Synchronisé"); })
         .catch(function(){ setSyncStatus("Erreur de sync", true); });
     }, 250);
@@ -1665,15 +1683,38 @@
     WEEKDAYS.forEach(function(w){ html += '<div class="mini-weekday-cell">'+w+'</div>'; });
     html += '</div>';
 
+    // Pré-calculer les gardes actives par date
+    var gardeByDate = {};
+    (state.gardes||[]).forEach(function(g){
+      var cur = new Date(g.startDate), end = new Date(g.endDate);
+      while(cur <= end){
+        var iso = toISO(cur);
+        if(!gardeByDate[iso]) gardeByDate[iso] = [];
+        gardeByDate[iso].push(g);
+        cur.setDate(cur.getDate()+1);
+      }
+    });
+
     html += '<div class="mini-cal-grid">';
     cells.forEach(function(cell){
       var iso = toISO(cell.date);
       var dayEvents = byDate[iso] || [];
       var isToday = iso===today;
-      html += '<div class="mini-day-cell'+(cell.inMonth?"":" muted")+'">';
+      var gardesForDay = gardeByDate[iso] || [];
+      var gardeClasses = "";
+      var gardeStripes = "";
+
+      gardesForDay.forEach(function(g){
+        var isStart = g.startDate === iso;
+        var isEnd   = g.endDate   === iso;
+        gardeClasses = " garde" + (isStart?" garde-start":"") + (isEnd?" garde-end":"");
+        gardeStripes += '<div class="garde-stripe" style="background:'+esc(g.color)+'"></div>';
+      });
+
+      html += '<div class="mini-day-cell'+(cell.inMonth?" clickable-day":"muted")+gardeClasses+'" data-date="'+iso+'">';
+      html += gardeStripes;
 
       if(dayEvents.length>0 && cell.inMonth && !isToday){
-        // Cercle coloré : si un seul enfant → sa couleur, si plusieurs → dégradé bisect
         var seenColors = [];
         var seenIds = {};
         dayEvents.forEach(function(ev){
@@ -1684,9 +1725,7 @@
             if(member) seenColors.push(getKidColor(member.color).hex);
           });
         });
-        var borderStyle = seenColors.length===1
-          ? '2px solid '+seenColors[0]
-          : '2px solid '+seenColors[0];
+        var borderStyle = '2px solid '+seenColors[0];
         var bgStyle = seenColors.length>=2
           ? 'conic-gradient('+seenColors[0]+' 0deg 180deg, '+seenColors[1]+' 180deg 360deg)'
           : 'transparent';
@@ -1702,6 +1741,79 @@
 
     document.getElementById("mini-prev").addEventListener("click", function(){ miniCalCursor = new Date(year, month-1, 1); renderMiniCalendar(); });
     document.getElementById("mini-next").addEventListener("click", function(){ miniCalCursor = new Date(year, month+1, 1); renderMiniCalendar(); });
+
+    card.querySelectorAll(".clickable-day[data-date]").forEach(function(el){
+      el.addEventListener("click", function(){
+        var iso = el.getAttribute("data-date");
+        var existing = (state.gardes||[]).find(function(g){ return g.startDate<=iso && g.endDate>=iso; });
+        openGardeModal(iso, existing||null);
+      });
+    });
+  }
+
+  var GARDE_COLORS = ["#60A5FA","#F472B6","#34D399","#FB923C","#A78BFA","#F87171"];
+
+  function openGardeModal(clickedDate, existing){
+    var root = document.getElementById("modal-root");
+    var isEdit = !!existing;
+    var g = existing || { id: uid(), startDate: clickedDate, endDate: clickedDate, label:"Garde", color: GARDE_COLORS[0] };
+
+    root.innerHTML = '<div class="modal-overlay" id="garde-overlay">'
+      +'<div class="modal-card" style="max-width:320px">'
+      +'<div class="modal-title">'+(isEdit?"✏️ Modifier la garde":"📅 Période de garde")+'</div>'
+      +'<label class="modal-label">Nom de la garde</label>'
+      +'<input class="modal-input" id="g-label" value="'+esc(g.label)+'" placeholder="ex: Garde papa" maxlength="40">'
+      +'<div style="display:flex;gap:10px">'
+      +'<div style="flex:1"><label class="modal-label">Début</label><input type="date" class="modal-input" id="g-start" value="'+g.startDate+'"></div>'
+      +'<div style="flex:1"><label class="modal-label">Fin</label><input type="date" class="modal-input" id="g-end" value="'+g.endDate+'"></div>'
+      +'</div>'
+      +'<label class="modal-label">Couleur</label>'
+      +'<div style="display:flex;gap:8px;margin-bottom:14px" id="g-colors">'
+      +GARDE_COLORS.map(function(c){
+        return '<div class="garde-color-swatch'+(g.color===c?' selected':'')+'" data-color="'+c+'" style="background:'+c+'"></div>';
+      }).join('')
+      +'</div>'
+      +'<div class="modal-btns">'
+      +(isEdit?'<button class="modal-btn danger" id="g-delete">Supprimer</button>':'')
+      +'<button class="modal-btn secondary" id="g-cancel">Annuler</button>'
+      +'<button class="modal-btn primary" id="g-save">Enregistrer</button>'
+      +'</div>'
+      +'</div></div>';
+
+    var selectedColor = g.color;
+    root.querySelectorAll(".garde-color-swatch").forEach(function(sw){
+      sw.addEventListener("click", function(){
+        root.querySelectorAll(".garde-color-swatch").forEach(function(s){ s.classList.remove("selected"); });
+        sw.classList.add("selected");
+        selectedColor = sw.getAttribute("data-color");
+      });
+    });
+
+    document.getElementById("g-cancel").addEventListener("click", function(){ root.innerHTML=""; });
+    document.getElementById("garde-overlay").addEventListener("click", function(e){ if(e.target.id==="garde-overlay") root.innerHTML=""; });
+
+    if(isEdit){
+      document.getElementById("g-delete").addEventListener("click", function(){
+        state.gardes = state.gardes.filter(function(x){ return x.id!==g.id; });
+        saveState(); renderMiniCalendar(); root.innerHTML="";
+      });
+    }
+
+    document.getElementById("g-save").addEventListener("click", function(){
+      var label = document.getElementById("g-label").value.trim() || "Garde";
+      var start = document.getElementById("g-start").value;
+      var end   = document.getElementById("g-end").value;
+      if(!start||!end) return;
+      if(end < start) end = start;
+      var newGarde = { id: g.id, label: label, startDate: start, endDate: end, color: selectedColor };
+      if(isEdit){
+        state.gardes = state.gardes.map(function(x){ return x.id===g.id ? newGarde : x; });
+      } else {
+        if(!state.gardes) state.gardes=[];
+        state.gardes.push(newGarde);
+      }
+      saveState(); renderMiniCalendar(); root.innerHTML="";
+    });
   }
 
   // ---------- Notes post-it ----------
