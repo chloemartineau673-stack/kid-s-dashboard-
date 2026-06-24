@@ -2247,7 +2247,7 @@
   function setChatOpen(open){
     chatOpen = open;
     document.getElementById("chat-panel").classList.toggle("hidden", !open);
-    document.getElementById("chat-fab").classList.toggle("hidden", open);
+    document.getElementById("chat-fab").style.display = open ? "none" : "";
     if(open){
       chatLastSeen = Date.now();
       try{ localStorage.setItem("family-rdv-chat-seen", chatLastSeen); }catch(e){}
