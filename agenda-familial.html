@@ -1151,16 +1151,19 @@
 
     upcoming.forEach(function(ev){
       var evMs = new Date(ev.date).getTime();
-      var diff = Math.round((evMs - prevMs) / 86400000);
-      var gap = Math.max(54, Math.min(diff * 14, 110));
+      var gapDiff = Math.round((evMs - prevMs) / 86400000);
+      var gap = Math.max(54, Math.min(gapDiff * 14, 110));
+      var fromToday = Math.round((evMs - todayMs) / 86400000);
       var members = state.members.filter(function(m){ return ev.memberIds.indexOf(m.id)!==-1; });
       var color = members.length ? getKidColor(members[0].color).hex : "var(--accent)";
       var isToday = ev.date === today;
       var title = ev.title.length > 13 ? ev.title.slice(0,13)+"…" : ev.title;
+      var months = Math.round(fromToday / 30.5);
+      var label = fromToday === 0 ? 'auj.' : fromToday === 1 ? 'demain' : fromToday >= 30 ? 'dans '+(months===1?'1 mois':months+' mois') : 'dans '+fromToday+'j';
 
       html += '<div class="tl-connector" style="width:'+gap+'px"><div class="tl-line"></div>';
       if(firstConnector){ html += '<span class="tl-car">🚗</span>'; firstConnector = false; }
-      html += diff>1 ? '<span class="tl-days">dans '+diff+'j</span>' : diff===1 ? '<span class="tl-days">demain</span>' : '<span class="tl-days">auj.</span>';
+      html += '<span class="tl-days">'+label+'</span>';
       html += '</div>';
       html += '<div class="tl-node clickable" data-tl="'+ev.id+'">';
       html += '<div class="tl-dot" style="background:'+color+';border-color:'+color+';'+(isToday?'box-shadow:0 0 0 3px '+color+'55':'')+'"></div>';
