@@ -640,6 +640,8 @@
   .tl-line{ height:2px; width:100%; background:var(--border); border-radius:1px; }
   .tl-days{ font-size:8.5px; color:var(--text-tertiary); margin-top:2px; white-space:nowrap; }
   .tl-empty{ font-size:12px; color:var(--text-tertiary); padding:4px 16px 0; font-weight:600; }
+  .tl-car{ font-size:18px; line-height:1; display:block; animation:tl-car-bounce 2s ease-in-out infinite; }
+  @keyframes tl-car-bounce{ 0%,100%{transform:translateY(0)} 50%{transform:translateY(-3px)} }
 
   /* ---------- Background pattern ---------- */
   #bg-pattern{
@@ -1130,7 +1132,7 @@
       .sort(function(a,b){ return a.date.localeCompare(b.date); })
       .slice(0, 12);
 
-    var html = '<div class="tl-node"><div class="tl-dot today"></div><span class="tl-label">Aujourd\'hui</span></div>';
+    var html = '<div class="tl-node"><span class="tl-car">🚗</span><div class="tl-dot today"></div><span class="tl-label">Aujourd\'hui</span></div>';
     var prevMs = todayMs;
 
     upcoming.forEach(function(ev){
