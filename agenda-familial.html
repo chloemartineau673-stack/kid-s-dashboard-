@@ -650,6 +650,55 @@
     75%,100%{ left:4px; }
   }
 
+  /* ---------- Today popup ---------- */
+  #today-popup-overlay{
+    position:fixed; inset:0; z-index:200;
+    background:rgba(0,0,0,0.45); backdrop-filter:blur(3px);
+    display:flex; align-items:center; justify-content:center;
+    animation:fade-in 0.3s ease;
+  }
+  #today-popup{
+    background:var(--surface); border-radius:22px; padding:24px 22px 20px;
+    width:min(340px,90vw); box-shadow:0 8px 40px rgba(0,0,0,0.22);
+    animation:popup-slide-in 0.45s cubic-bezier(.22,1,.36,1);
+    position:relative; overflow:hidden;
+  }
+  @keyframes popup-slide-in{
+    from{ opacity:0; transform:translateY(40px) scale(0.95); }
+    to  { opacity:1; transform:translateY(0)   scale(1); }
+  }
+  .popup-header{
+    display:flex; align-items:center; gap:10px; margin-bottom:18px;
+  }
+  .popup-header-icon{ font-size:28px; animation:pop-icon 0.6s 0.3s cubic-bezier(.34,1.56,.64,1) both; }
+  @keyframes pop-icon{ from{transform:scale(0) rotate(-20deg)} to{transform:scale(1) rotate(0)} }
+  .popup-title{ font-size:16px; font-weight:900; color:var(--text); line-height:1.2; }
+  .popup-subtitle{ font-size:11px; color:var(--text-tertiary); font-weight:600; margin-top:1px; }
+  .popup-rdv-list{ display:flex; flex-direction:column; gap:10px; margin-bottom:18px; }
+  .popup-rdv{
+    border-radius:13px; padding:12px 14px; display:flex; align-items:flex-start; gap:10px;
+    animation:popup-item-in 0.4s cubic-bezier(.22,1,.36,1) both;
+  }
+  .popup-rdv-dot{ width:10px; height:10px; border-radius:50%; flex-shrink:0; margin-top:4px; }
+  .popup-rdv-title{ font-size:13px; font-weight:800; color:var(--text); }
+  .popup-rdv-meta{ font-size:11px; color:var(--text-tertiary); margin-top:2px; }
+  @keyframes popup-item-in{
+    from{ opacity:0; transform:translateX(-16px); }
+    to  { opacity:1; transform:translateX(0); }
+  }
+  .popup-none{ text-align:center; padding:18px 0; font-size:13px; color:var(--text-tertiary); font-weight:600; }
+  .popup-close{
+    display:block; width:100%; padding:12px; border:none; border-radius:13px;
+    background:var(--accent); color:#fff; font-size:14px; font-weight:800;
+    cursor:pointer; letter-spacing:0.2px;
+    animation:popup-item-in 0.4s 0.5s cubic-bezier(.22,1,.36,1) both;
+  }
+  .popup-close:active{ opacity:0.85; }
+  #today-popup-overlay.closing{ animation:fade-out 0.25s ease forwards; }
+  #today-popup-overlay.closing #today-popup{ animation:popup-slide-out 0.25s ease forwards; }
+  @keyframes fade-out{ to{ opacity:0; } }
+  @keyframes popup-slide-out{ to{ opacity:0; transform:translateY(30px) scale(0.95); } }
+
   /* ---------- Background pattern ---------- */
   #bg-pattern{
     position:fixed; inset:0; z-index:0; pointer-events:none; overflow:hidden;
@@ -1040,6 +1089,7 @@
       cleanPastEvents();
       setSyncStatus("Synchronisé");
       renderAll();
+      showTodayPopup();
     }, function(err){
       setSyncStatus("Hors ligne", true);
     });
@@ -1084,6 +1134,56 @@
   // ---------- Notifications ----------
   var knownEventIds = null;
   var knownMsgIds = null;
+  var todayPopupShown = false;
+
+  function showTodayPopup(){
+    if(todayPopupShown) return;
+    todayPopupShown = true;
+    var today = todayISO();
+    var todayEvents = state.events.filter(function(e){ return e.date === today; })
+      .sort(function(a,b){ return (a.time||"").localeCompare(b.time||""); });
+
+    var itemsHtml = "";
+    if(todayEvents.length === 0){
+      itemsHtml = '<div class="popup-none">🎉 Rien de prévu aujourd\'hui !</div>';
+    } else {
+      todayEvents.forEach(function(ev, i){
+        var members = state.members.filter(function(m){ return ev.memberIds.indexOf(m.id)!==-1; });
+        var color = members.length ? getKidColor(members[0].color).hex : "var(--accent)";
+        var bg = members.length ? getKidColor(members[0].color).bg : "var(--surface2,#f0f0f0)";
+        var meta = [];
+        if(ev.time) meta.push("⏰ "+ev.time);
+        if(ev.location) meta.push("📍 "+esc(ev.location));
+        if(members.length) meta.push(members.map(function(m){return esc(m.name);}).join(", "));
+        itemsHtml += '<div class="popup-rdv" style="background:'+bg+';animation-delay:'+(0.15+i*0.1)+'s">';
+        itemsHtml += '<div class="popup-rdv-dot" style="background:'+color+'"></div>';
+        itemsHtml += '<div><div class="popup-rdv-title">'+esc(ev.title)+'</div>';
+        if(meta.length) itemsHtml += '<div class="popup-rdv-meta">'+meta.join(' · ')+'</div>';
+        itemsHtml += '</div></div>';
+      });
+    }
+
+    var overlay = document.createElement("div");
+    overlay.id = "today-popup-overlay";
+    overlay.innerHTML =
+      '<div id="today-popup">'
+      +'<div class="popup-header">'
+      +'<span class="popup-header-icon">📅</span>'
+      +'<div><div class="popup-title">Programme du jour</div>'
+      +'<div class="popup-subtitle">'+new Date().toLocaleDateString("fr-FR",{weekday:"long",day:"numeric",month:"long"})+'</div></div>'
+      +'</div>'
+      +'<div class="popup-rdv-list">'+itemsHtml+'</div>'
+      +'<button class="popup-close" id="popup-close-btn">C\'est parti ! 🚀</button>'
+      +'</div>';
+    document.body.appendChild(overlay);
+
+    function closePopup(){
+      overlay.classList.add("closing");
+      setTimeout(function(){ if(overlay.parentNode) overlay.parentNode.removeChild(overlay); }, 260);
+    }
+    document.getElementById("popup-close-btn").addEventListener("click", closePopup);
+    overlay.addEventListener("click", function(e){ if(e.target === overlay) closePopup(); });
+  }
 
   function requestNotifPermission(){
     if("Notification" in window && Notification.permission === "default"){
