@@ -2244,10 +2244,11 @@
     if(input) input.focus();
   });
 
-  document.getElementById("chat-fab").addEventListener("click", function(){
-    chatOpen = !chatOpen;
-    document.getElementById("chat-panel").classList.toggle("hidden", !chatOpen);
-    if(chatOpen){
+  function setChatOpen(open){
+    chatOpen = open;
+    document.getElementById("chat-panel").classList.toggle("hidden", !open);
+    document.getElementById("chat-fab").classList.toggle("hidden", open);
+    if(open){
       chatLastSeen = Date.now();
       try{ localStorage.setItem("family-rdv-chat-seen", chatLastSeen); }catch(e){}
       var badge = document.getElementById("chat-badge");
@@ -2258,12 +2259,10 @@
         document.getElementById("chat-input").focus();
       }, 60);
     }
-  });
+  }
 
-  document.getElementById("chat-close-btn").addEventListener("click", function(){
-    chatOpen = false;
-    document.getElementById("chat-panel").classList.add("hidden");
-  });
+  document.getElementById("chat-fab").addEventListener("click", function(){ setChatOpen(true); });
+  document.getElementById("chat-close-btn").addEventListener("click", function(){ setChatOpen(false); });
 
   document.getElementById("chat-send-btn").addEventListener("click", doSendMessage);
 
