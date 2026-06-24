@@ -1758,26 +1758,31 @@
     var isEdit = !!existing;
     var g = existing || { id: uid(), startDate: clickedDate, endDate: clickedDate, label:"Garde", color: GARDE_COLORS[0] };
 
-    root.innerHTML = '<div class="modal-overlay" id="garde-overlay">'
-      +'<div class="modal-card" style="max-width:320px">'
-      +'<div class="modal-title">'+(isEdit?"✏️ Modifier la garde":"📅 Période de garde")+'</div>'
-      +'<label class="modal-label">Nom de la garde</label>'
-      +'<input class="modal-input" id="g-label" value="'+esc(g.label)+'" placeholder="ex: Garde papa" maxlength="40">'
-      +'<div style="display:flex;gap:10px">'
-      +'<div style="flex:1"><label class="modal-label">Début</label><input type="date" class="modal-input" id="g-start" value="'+g.startDate+'"></div>'
-      +'<div style="flex:1"><label class="modal-label">Fin</label><input type="date" class="modal-input" id="g-end" value="'+g.endDate+'"></div>'
+    root.innerHTML = '<div class="overlay" id="garde-overlay">'
+      +'<div class="modal" style="border-radius:20px 20px 0 0">'
+      +'<div class="modal-header">'
+      +'<span class="modal-title">'+(isEdit?"✏️ Modifier la garde":"📅 Période de garde")+'</span>'
+      +'<button class="close-btn" id="g-cancel"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>'
       +'</div>'
-      +'<label class="modal-label">Couleur</label>'
-      +'<div style="display:flex;gap:8px;margin-bottom:14px" id="g-colors">'
+      +'<div class="modal-body">'
+      +'<div class="field"><label class="field-label">Nom de la garde</label>'
+      +'<input type="text" id="g-label" value="'+esc(g.label)+'" placeholder="ex: Garde papa" maxlength="40"></div>'
+      +'<div class="field-row">'
+      +'<div class="field"><label class="field-label">Début</label><input type="date" id="g-start" value="'+g.startDate+'"></div>'
+      +'<div class="field"><label class="field-label">Fin</label><input type="date" id="g-end" value="'+g.endDate+'"></div>'
+      +'</div>'
+      +'<div class="field"><label class="field-label">Couleur</label>'
+      +'<div style="display:flex;gap:10px;flex-wrap:wrap" id="g-colors">'
       +GARDE_COLORS.map(function(c){
         return '<div class="garde-color-swatch'+(g.color===c?' selected':'')+'" data-color="'+c+'" style="background:'+c+'"></div>';
       }).join('')
+      +'</div></div>'
       +'</div>'
-      +'<div class="modal-btns">'
-      +(isEdit?'<button class="modal-btn danger" id="g-delete">Supprimer</button>':'')
-      +'<button class="modal-btn secondary" id="g-cancel">Annuler</button>'
-      +'<button class="modal-btn primary" id="g-save">Enregistrer</button>'
-      +'</div>'
+      +'<div class="modal-footer">'
+      +(isEdit?'<button class="danger-btn" id="g-delete">🗑 Supprimer</button>':'<div></div>')
+      +'<div class="footer-actions">'
+      +'<button class="primary-btn" id="g-save">Enregistrer</button>'
+      +'</div></div>'
       +'</div></div>';
 
     var selectedColor = g.color;
