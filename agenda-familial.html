@@ -997,8 +997,10 @@
       localStorage.setItem(LOCAL_CODE_KEY, code);
       document.getElementById("lock-screen").classList.add("app-hidden");
       document.getElementById("app-root").classList.remove("app-hidden");
+      requestNotifPermission();
       subscribeToChanges();
       initChat(code);
+      setInterval(function(){ cleanPastEvents(); }, 60000);
     }).catch(function(err){
       showLockError("Connexion impossible. Vérifie ta connexion internet et réessaie.");
     });
@@ -1008,8 +1010,19 @@
     docRef.onSnapshot(function(snap){
       if(!snap.exists) return;
       var data = snap.data();
+      var newEvents = Array.isArray(data.events) ? data.events : [];
+      if(knownEventIds !== null){
+        newEvents.forEach(function(ev){
+          if(!knownEventIds.has(ev.id)){
+            var dateStr = ev.date ? " – " + ev.date.split("-").reverse().join("/") : "";
+            var timeStr = ev.time ? " à " + ev.time : "";
+            showNotif("📅 Nouveau RDV", ev.title + dateStr + timeStr);
+          }
+        });
+      }
+      knownEventIds = new Set(newEvents.map(function(e){ return e.id; }));
       applyingRemoteUpdate = true;
-      state.events = Array.isArray(data.events) ? data.events : [];
+      state.events = newEvents;
       state.members = Array.isArray(data.members) && data.members.length ? data.members : DEFAULT_KIDS.slice();
       state.notes = Array.isArray(data.notes) ? data.notes : [];
       state.todos = Array.isArray(data.todos) ? data.todos : [];
@@ -1045,12 +1058,39 @@
   }
 
   // ---------- Render: everything ----------
-  // ---------- Suppression des RDV passés ----------
+  // ---------- Suppression des RDV passés (date + heure) ----------
   function cleanPastEvents(){
+    var now = new Date();
     var today = todayISO();
+    var currentTime = pad(now.getHours())+":"+pad(now.getMinutes());
     var before = state.events.length;
-    state.events = state.events.filter(function(e){ return e.date >= today; });
-    if(state.events.length < before) saveState();
+    state.events = state.events.filter(function(e){
+      if(e.date < today) return false;
+      if(e.date === today && e.time && e.time < currentTime) return false;
+      return true;
+    });
+    if(state.events.length < before){ saveState(); renderAll(); }
+  }
+
+  // ---------- Notifications ----------
+  var knownEventIds = null;
+  var knownMsgIds = null;
+
+  function requestNotifPermission(){
+    if("Notification" in window && Notification.permission === "default"){
+      Notification.requestPermission();
+    }
+  }
+
+  function showNotif(title, body){
+    if(!("Notification" in window) || Notification.permission !== "granted") return;
+    try{
+      var n = new Notification(title, {
+        body: body,
+        icon: "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><rect width='64' height='64' rx='14' fill='%237B6FF5'/><text y='46' x='10' font-size='40'>📅</text></svg>"
+      });
+      setTimeout(function(){ n.close(); }, 6000);
+    }catch(e){}
   }
 
   // ---------- Son de validation ----------
@@ -1975,6 +2015,14 @@
     chatRef.orderBy("ts").limitToLast(80).onSnapshot(function(snap){
       var msgs = [];
       snap.forEach(function(doc){ msgs.push(Object.assign({id:doc.id}, doc.data())); });
+      if(knownMsgIds !== null){
+        msgs.forEach(function(m){
+          if(!knownMsgIds.has(m.id) && !chatOpen && m.deviceId !== getDeviceId()){
+            showNotif("💬 Nouveau message", m.text ? m.text.slice(0,80) : "Nouveau message dans le chat");
+          }
+        });
+      }
+      knownMsgIds = new Set(msgs.map(function(m){ return m.id; }));
       renderChatMessages(msgs);
       if(!chatOpen){
         var newCount = msgs.filter(function(m){ return (m.ts||0) > chatLastSeen; }).length;
