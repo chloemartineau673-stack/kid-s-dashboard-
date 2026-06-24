@@ -1160,7 +1160,7 @@
 
       html += '<div class="tl-connector" style="width:'+gap+'px"><div class="tl-line"></div>';
       if(firstConnector){ html += '<span class="tl-car">🚗</span>'; firstConnector = false; }
-      html += diff>0 ? '<span class="tl-days">+'+diff+'j</span>' : '<span class="tl-days">auj.</span>';
+      html += diff>1 ? '<span class="tl-days">dans '+diff+'j</span>' : diff===1 ? '<span class="tl-days">demain</span>' : '<span class="tl-days">auj.</span>';
       html += '</div>';
       html += '<div class="tl-node clickable" data-tl="'+ev.id+'">';
       html += '<div class="tl-dot" style="background:'+color+';border-color:'+color+';'+(isToday?'box-shadow:0 0 0 3px '+color+'55':'')+'"></div>';
