@@ -372,7 +372,15 @@
     display:flex;align-items:center;justify-content:center;color:var(--notes-text); flex-shrink:0;
   }
   .notes-list{ display:flex; flex-direction:column; gap:6px; max-height:160px; overflow-y:auto; }
-  .note-item{ background:rgba(255,255,255,0.55); border-radius:9px; padding:7px 8px; }
+  .note-item{ background:rgba(255,255,255,0.55); border-radius:9px; padding:7px 8px; display:flex; gap:8px; align-items:flex-start; }
+  .note-checkbox{
+    width:18px; height:18px; border-radius:5px; flex-shrink:0; margin-top:1px;
+    border:2px solid var(--notes-border); background:transparent;
+    display:flex; align-items:center; justify-content:center;
+    cursor:pointer; transition:background 0.15s;
+  }
+  .note-checkbox.checked{ background:var(--notes-border); }
+  .note-item-body{ flex:1; min-width:0; }
   .note-item-top{ display:flex; align-items:center; justify-content:space-between; gap:6px; }
   .note-item-type{ font-size:11px; font-weight:800; }
   .note-item-del{ background:none; border:none; padding:0; opacity:0.5; display:flex; }
@@ -1505,10 +1513,16 @@
       el.addEventListener("click", function(){
         var id = el.getAttribute("data-toggle");
         var todo = state.todos.find(function(t){ return t.id===id; });
-        if(todo && !todo.done) playCheckSound();
-        state.todos = state.todos.map(function(t){ return t.id===id ? Object.assign({},t,{done:!t.done}) : t; });
+        if(!todo || todo.done) return;
+        playCheckSound();
+        state.todos = state.todos.map(function(t){ return t.id===id ? Object.assign({},t,{done:true}) : t; });
         saveState();
         renderTodos();
+        setTimeout(function(){
+          state.todos = state.todos.filter(function(t){ return t.id!==id; });
+          saveState();
+          renderTodos();
+        }, 700);
       });
     });
 
@@ -1838,7 +1852,9 @@
     } else {
       html += '<div class="notes-list">';
       sorted.forEach(function(n){
-        html += '<div class="note-item" data-edit-note="'+n.id+'">';
+        html += '<div class="note-item">';
+        html += '<div class="note-checkbox" data-check-note="'+n.id+'"></div>';
+        html += '<div class="note-item-body" data-edit-note="'+n.id+'">';
         html += '<div class="note-item-top">';
         if(n.label) html += '<span style="font-size:12px;font-weight:800;">'+esc(n.label)+'</span>';
         html += '<button class="note-item-del" data-del-note="'+n.id+'" aria-label="Supprimer"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button></div>';
@@ -1848,7 +1864,7 @@
         if(n.location) metaParts.push(n.location);
         if(metaParts.length) html += '<div class="note-item-meta">'+esc(metaParts.join(" · "))+'</div>';
         if(n.comment) html += '<div class="note-item-comment">'+esc(n.comment)+'</div>';
-        html += '</div>';
+        html += '</div></div>';
       });
       html += '</div>';
     }
@@ -1856,6 +1872,22 @@
     card.innerHTML = html;
 
     document.getElementById("notes-add-btn").addEventListener("click", function(){ openNoteModal(null); });
+
+    card.querySelectorAll("[data-check-note]").forEach(function(el){
+      el.addEventListener("click", function(e){
+        e.stopPropagation();
+        var id = el.getAttribute("data-check-note");
+        el.classList.add("checked");
+        el.innerHTML = '<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>';
+        playCheckSound();
+        setTimeout(function(){
+          state.notes = state.notes.filter(function(n){ return n.id!==id; });
+          saveState();
+          renderNotes();
+        }, 700);
+      });
+    });
+
     card.querySelectorAll("[data-edit-note]").forEach(function(el){
       el.addEventListener("click", function(e){
         if(e.target.closest("[data-del-note]")) return;
