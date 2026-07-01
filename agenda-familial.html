@@ -1730,7 +1730,7 @@ if("serviceWorker" in navigator){
         gardeStripes += '<div class="garde-stripe" style="background:'+esc(g.color)+'"></div>';
       });
 
-      html += '<div class="mini-day-cell'+(cell.inMonth?" clickable-day":"muted")+gardeClasses+'" data-date="'+iso+'">';
+      html += '<div class="mini-day-cell clickable-day'+(cell.inMonth?"":" muted")+gardeClasses+'" data-date="'+iso+'">';
       html += gardeStripes;
 
       if(dayEvents.length>0 && cell.inMonth && !isToday){
